@@ -36,18 +36,23 @@ function todayString() {
 export default function TodayView() {
   const [quote, setQuote] = useState("");
   const [mood, setMood] = useState<string | null>(null);
+  const [reminders, setReminders] = useState<any[]>([]);
+  const [focusSessions, setFocusSessions] = useState<any[]>([]);
 
   const today = new Date().toISOString().split("T")[0];
   const now = Date.now();
 
   /* LOAD DATA */
-  const reminders = JSON.parse(
-    localStorage.getItem("reminders") || "[]"
-  );
-
-  const focusSessions = JSON.parse(
-    localStorage.getItem("focusSessions") || "[]"
-  );
+  useEffect(() => {
+    const storedReminders = JSON.parse(
+      localStorage.getItem("reminders") || "[]"
+    );
+    const storedFocusSessions = JSON.parse(
+      localStorage.getItem("focusSessions") || "[]"
+    );
+    setReminders(storedReminders);
+    setFocusSessions(storedFocusSessions);
+  }, []);
 
   /* FILTER TODAY DATA */
   const todayReminders = reminders.filter(
