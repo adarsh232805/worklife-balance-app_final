@@ -1,253 +1,110 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import {
-  Play,
-  Pause,
-  RotateCcw,
-  Music,
-  Brain,
-  Coffee,
-  Volume2,
-  Maximize,
-  Minimize,
-} from "lucide-react";
-
-/* ---------------- CONFIG ---------------- */
-
-const DURATIONS = {
-  pomodoro: 25 * 60,
-  deep: 50 * 60,
-};
-
-const FALLBACK_QUOTES = [
-  "Focus on progress, not perfection.",
-  "Small steps every day lead to big results.",
-  "आज का फोकस, कल की सफलता।",
-  "काम पर ध्यान दो, परिणाम अपने आप आएगा।",
-];
-
-const DEFAULT_SOUNDS = [
-  {
-    name: "Rain",
-    src: "https://cdn.pixabay.com/audio/2022/03/15/audio_58cfaec0d1.mp3",
-  },
-  {
-    name: "Forest",
-    src: "https://cdn.pixabay.com/audio/2022/10/03/audio_63c2b2a93e.mp3",
-  },
-  {
-    name: "Focus Music",
-    src: "https://cdn.pixabay.com/audio/2022/01/18/audio_d0c6d8a92d.mp3",
-  },
-];
-
-type Mode = "pomodoro" | "deep";
-
-/* ---------------- COMPONENT ---------------- */
+import { useEffect, useState } from "react";
+import FocusTimer from "./FocusTimer";
+import { api } from "@/lib/api";
+import { Brain, Calendar, Clock } from "lucide-react";
+import { format } from "date-fns";
+import { motion } from "framer-motion";
 
 export default function FocusTab() {
-  const [mode, setMode] = useState<Mode>("pomodoro");
-  const [seconds, setSeconds] = useState(DURATIONS.pomodoro);
-  const [running, setRunning] = useState(false);
-  const [sessions, setSessions] = useState<number[]>([]);
-  const [quote, setQuote] = useState(FALLBACK_QUOTES[0]);
-  const [zen, setZen] = useState(false);
+  const [history, setHistory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [playlist, setPlaylist] = useState(DEFAULT_SOUNDS);
-  const [sound, setSound] = useState(DEFAULT_SOUNDS[0]);
-  const [volume, setVolume] = useState(0.4);
-
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  /* ---------------- TIMER ---------------- */
-
-  useEffect(() => {
-    if (!running) return;
-
-    const i = setInterval(() => {
-      setSeconds((s) => {
-        if (s <= 1) {
-          setRunning(false);
-          setSessions((prev) => [...prev, Date.now()]);
-          fetchQuote();
-          return DURATIONS[mode];
-        }
-        return s - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(i);
-  }, [running, mode]);
-
-  /* ---------------- AUDIO ---------------- */
-
-  useEffect(() => {
-    if (!audioRef.current) return;
-    audioRef.current.volume = volume;
-    if (running) audioRef.current.play();
-    else audioRef.current.pause();
-  }, [running, volume, sound]);
-
-  /* ---------------- QUOTES ---------------- */
-
-  async function fetchQuote() {
+  const fetchHistory = async () => {
     try {
-      const res = await fetch("/api/quote");
-      const data = await res.json();
-      setQuote(data.quote);
-    } catch {
-      setQuote(
-        FALLBACK_QUOTES[Math.floor(Math.random() * FALLBACK_QUOTES.length)]
-      );
+      const today = new Date().toISOString().split("T")[0];
+      const data = await api.activity.getHistory(today);
+      setHistory(data);
+    } catch (error) {
+      console.error("Failed to fetch focus history", error);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  /* ---------------- HELPERS ---------------- */
+  useEffect(() => {
+    fetchHistory();
+  }, []);
 
-  function reset() {
-    setRunning(false);
-    setSeconds(DURATIONS[mode]);
-  }
-
-  function changeMode(m: Mode) {
-    setMode(m);
-    setRunning(false);
-    setSeconds(DURATIONS[m]);
-  }
-
-  const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
-  const ss = String(seconds % 60).padStart(2, "0");
-
-  const todaySessions = sessions.filter(
-    (s) => new Date(s).toDateString() === new Date().toDateString()
-  ).length;
+  const handleSessionComplete = () => {
+    fetchHistory(); // Refresh history when a session is done
+  };
 
   return (
-    <div className={zen ? "fixed inset-0 z-50 bg-white p-10" : ""}>
-      <div className="grid md:grid-cols-3 gap-6">
+    <div className="grid lg:grid-cols-3 gap-8">
+      {/* LEFT: TIMER */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="lg:col-span-2"
+      >
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-purple-50/50 to-pink-50/50 -z-10" />
 
-        {/* MAIN */}
-        <div className="md:col-span-2 bg-white rounded-3xl shadow p-8 text-center">
-
-          <div className="flex justify-between mb-4">
-            <div className="flex gap-3">
-              <ModeButton active={mode === "pomodoro"} onClick={() => changeMode("pomodoro")} label="Pomodoro" />
-              <ModeButton active={mode === "deep"} onClick={() => changeMode("deep")} label="Deep Focus" />
+          <div className="p-8">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-slate-800">Deep Focus</h2>
+              <p className="text-slate-500">Pick a mode and start your flow.</p>
             </div>
-
-            <button onClick={() => setZen(!zen)}>
-              {zen ? <Minimize /> : <Maximize />}
-            </button>
+            <FocusTimer onSessionComplete={handleSessionComplete} />
           </div>
+        </div>
+      </motion.div>
 
-          <div className="text-7xl font-mono font-bold my-6">
-            {mm}:{ss}
-          </div>
+      {/* RIGHT: HISTORY */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.1 }}
+        className="space-y-6"
+      >
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 max-h-[600px] overflow-y-auto">
+          <h3 className="font-semibold flex items-center gap-2 mb-6 text-slate-800">
+            <div className="p-2 bg-primary/10 rounded-lg"><Brain size={18} className="text-primary" /></div>
+            Today's Sessions
+          </h3>
 
-          <div className="flex justify-center gap-6">
-            <ControlButton
-              icon={running ? <Pause /> : <Play />}
-              onClick={() => setRunning(!running)}
-            />
-            <ControlButton icon={<RotateCcw />} onClick={reset} />
-          </div>
+          {loading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map(i => <div key={i} className="h-16 bg-slate-50 rounded-xl animate-pulse" />)}
+            </div>
+          ) : history.length === 0 ? (
+            <div className="text-center py-10 text-slate-400">
+              <Clock size={40} className="mx-auto mb-3 opacity-20" />
+              <p>No focus sessions yet.</p>
+              <p className="text-sm">Start the timer to track your work!</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {history.map((session: any) => (
+                <div key={session._id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors group">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-2 h-2 rounded-full ${session.type === 'Focus' ? 'bg-primary' : 'bg-teal-500'}`} />
+                    <div>
+                      <p className="font-semibold text-slate-800">{session.type}</p>
+                      <p className="text-xs text-slate-400 flex items-center gap-1">
+                        <Calendar size={10} />
+                        {format(new Date(session.startTime), 'h:mm a')}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="font-mono font-medium text-slate-600 bg-white px-2 py-1 rounded text-sm shadow-sm">
+                    {session.duration}m
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-          <p className="mt-8 italic text-slate-600 text-lg">
-            “{quote}”
+        <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-6 text-white shadow-lg">
+          <h3 className="font-bold text-lg mb-2">Pro Tip</h3>
+          <p className="text-indigo-100 text-sm leading-relaxed">
+            The Pomodoro technique suggests 25 minutes of work followed by a 5-minute break. This keeps your mind fresh and reduces fatigue.
           </p>
         </div>
-
-        {/* SIDE */}
-        <div className="space-y-6">
-
-          {/* ANALYTICS */}
-          <Card title="Focus Analytics" icon={<Brain />}>
-            <p className="text-sm text-slate-600">Sessions today</p>
-            <p className="text-3xl font-bold text-indigo-600">
-              {todaySessions}
-            </p>
-          </Card>
-
-          {/* BREAK */}
-          <Card title="Break Tips" icon={<Coffee />}>
-            <ul className="text-sm text-slate-600 space-y-1">
-              <li>• Stretch your body</li>
-              <li>• Drink water</li>
-              <li>• Rest your eyes</li>
-            </ul>
-          </Card>
-
-          {/* AUDIO */}
-          <Card title="Focus Audio" icon={<Music />}>
-            <select
-              value={sound.name}
-              onChange={(e) =>
-                setSound(playlist.find((s) => s.name === e.target.value)!)
-              }
-              className="w-full border rounded-lg p-2 text-sm"
-            >
-              {playlist.map((s) => (
-                <option key={s.name}>{s.name}</option>
-              ))}
-            </select>
-
-            <audio ref={audioRef} loop>
-              <source src={sound.src} />
-            </audio>
-
-            <div className="mt-4">
-              <label className="text-sm">Volume</label>
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.01}
-                value={volume}
-                onChange={(e) => setVolume(Number(e.target.value))}
-                className="w-full"
-              />
-            </div>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ---------------- UI COMPONENTS ---------------- */
-
-function ModeButton({ active, onClick, label }: any) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-6 py-2 rounded-xl text-sm font-medium ${
-        active ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-600"
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
-
-function ControlButton({ icon, onClick }: any) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-14 h-14 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow hover:scale-105 transition"
-    >
-      {icon}
-    </button>
-  );
-}
-
-function Card({ title, icon, children }: any) {
-  return (
-    <div className="bg-white rounded-2xl shadow p-6">
-      <h3 className="font-semibold flex items-center gap-2 mb-2">
-        {icon} {title}
-      </h3>
-      {children}
+      </motion.div>
     </div>
   );
 }

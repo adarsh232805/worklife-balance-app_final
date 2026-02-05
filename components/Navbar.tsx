@@ -1,0 +1,77 @@
+"use client";
+
+import { Bell, Search, User, LogOut } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { logOut } from "@/lib/actions";
+import Image from "next/image";
+import Link from "next/link";
+import LevelProgress from "./LevelProgress";
+
+export default function Navbar() {
+    const { data: session } = useSession();
+    const user = session?.user;
+
+    return (
+        <header className="sticky top-0 z-30 w-full glass border-b md:bg-transparent md:border-b-0 md:backdrop-filter-none md:static px-6 py-4 flex items-center justify-between">
+            {/* Mobile Brand (Desktop brand is in Sidebar) */}
+            <div className="md:hidden">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                    WorkLife+
+                </h1>
+            </div>
+
+            {/* Desktop Helper / Spacer */}
+            <div className="hidden md:block">
+                <h2 className="text-2xl font-semibold text-slate-800">
+                    Welcome back, {user?.name?.split(' ')[0] || 'Guest'}
+                </h2>
+                <p className="text-slate-500 text-sm">Let's be productive today.</p>
+            </div>
+
+            {/* Right Actions */}
+            <div className="flex items-center gap-3">
+                <button className="p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
+                    <Search size={20} />
+                </button>
+                <button className="p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors relative">
+                    <Bell size={20} />
+                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                </button>
+
+                {user && <LevelProgress />}
+
+                {user ? (
+                    <div className="group relative">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-purple-400 p-[2px] cursor-pointer">
+                            <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
+                                {user.image ? (
+                                    <Image src={user.image} alt={user.name || "User"} width={40} height={40} />
+                                ) : (
+                                    <User className="text-slate-400" />
+                                )}
+                            </div>
+                        </div>
+                        {/* DROPDOWN */}
+                        <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-100 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform origin-top-right z-50">
+                            <div className="px-4 py-3 border-b border-slate-50">
+                                <p className="text-sm font-semibold truncate">{user.name}</p>
+                                <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                            </div>
+                            <button
+                                onClick={() => logOut()}
+                                className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors rounded-b-xl"
+                            >
+                                <LogOut size={16} />
+                                Sign Out
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <Link href="/login" className="px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity">
+                        Log In
+                    </Link>
+                )}
+            </div>
+        </header>
+    );
+}
