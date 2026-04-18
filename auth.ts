@@ -7,6 +7,10 @@ import dbConnect from '@/lib/db';
 import UserModel from '@/lib/models/User';
 import bcrypt from 'bcryptjs';
 
+if (!process.env.AUTH_SECRET) {
+    console.warn("\x1b[31m[Auth Error] AUTH_SECRET is missing! Please add it to your Vercel environment variables.\x1b[0m");
+}
+
 async function getUser(email: string): Promise<User | undefined> {
     try {
         await dbConnect();
