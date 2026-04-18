@@ -25,6 +25,12 @@ export default function TaskModal({ isOpen, onClose, onAddTask, onAddEvent, onAd
     const [endTime, setEndTime] = useState("");
     const [eventType, setEventType] = useState("work");
 
+    // Shared State
+    const [date, setDate] = useState(() => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    });
+
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -33,33 +39,31 @@ export default function TaskModal({ isOpen, onClose, onAddTask, onAddEvent, onAd
 
         setIsSubmitting(true);
         try {
-            const today = new Date().toISOString().split('T')[0];
-
             if (type === 'task') {
-                if (!time) return;
-                const date = new Date(`${today}T${time}`);
+                if (!time || !date) return;
+                const d = new Date(`${date}T${time}`);
                 await onAddTask({
                     title,
                     priority,
-                    time: date.toISOString(),
+                    time: d.toISOString(),
                     category,
                     completed: false
                 });
             } else if (type === 'reminder') {
-                if (!time) return;
-                const date = new Date(`${today}T${time}`);
+                if (!time || !date) return;
+                const d = new Date(`${date}T${time}`);
                 await onAddReminder({
                     title,
                     priority,
-                    time: date.toISOString(),
+                    time: d.toISOString(),
                     category,
                     completed: false,
                     repeat: 'none' // Default to none for now
                 });
             } else {
-                if (!startTime || !endTime) return;
-                const start = new Date(`${today}T${startTime}`);
-                const end = new Date(`${today}T${endTime}`);
+                if (!startTime || !endTime || !date) return;
+                const start = new Date(`${date}T${startTime}`);
+                const end = new Date(`${date}T${endTime}`);
 
                 await onAddEvent({
                     title,
@@ -77,6 +81,8 @@ export default function TaskModal({ isOpen, onClose, onAddTask, onAddEvent, onAd
             setCategory("Work");
             setStartTime("");
             setEndTime("");
+            const d = new Date();
+            setDate(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
             onClose();
         } catch (error) {
             console.error("Failed to add item", error);
@@ -151,6 +157,18 @@ export default function TaskModal({ isOpen, onClose, onAddTask, onAddEvent, onAd
                                     <>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
+                                                <label className="block text-sm font-medium text-slate-700 mb-1 ml-1">Date</label>
+                                                <div className="relative">
+                                                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                    <input
+                                                        type="date"
+                                                        value={date}
+                                                        onChange={(e) => setDate(e.target.value)}
+                                                        className="w-full p-4 pl-12 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500/20 outline-none font-medium"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div>
                                                 <label className="block text-sm font-medium text-slate-700 mb-1 ml-1">{type === 'task' ? 'Due Time' : 'Remind me at'}</label>
                                                 <div className="relative">
                                                     <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -162,7 +180,9 @@ export default function TaskModal({ isOpen, onClose, onAddTask, onAddEvent, onAd
                                                     />
                                                 </div>
                                             </div>
-                                            <div>
+                                        </div>
+                                        <div>
+                                            <div className="w-full">
                                                 <label className="block text-sm font-medium text-slate-700 mb-1 ml-1">Priority</label>
                                                 <div className="relative">
                                                     <Flag className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -199,7 +219,19 @@ export default function TaskModal({ isOpen, onClose, onAddTask, onAddEvent, onAd
                                     </>
                                 ) : (
                                     <>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1 ml-1">Event Date</label>
+                                            <div className="relative">
+                                                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                <input
+                                                    type="date"
+                                                    value={date}
+                                                    onChange={(e) => setDate(e.target.value)}
+                                                    className="w-full p-4 pl-12 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orange-500/20 outline-none font-medium"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4 mt-4">
                                             <div>
                                                 <label className="block text-sm font-medium text-slate-700 mb-1 ml-1">Start Time</label>
                                                 <input
@@ -239,7 +271,7 @@ export default function TaskModal({ isOpen, onClose, onAddTask, onAddEvent, onAd
 
                                 <button
                                     type="submit"
-                                    disabled={isSubmitting || !title || ((type === 'task' || type === 'reminder') ? !time : (!startTime || !endTime))}
+                                    disabled={isSubmitting || !title || ((type === 'task' || type === 'reminder') ? (!time || !date) : (!startTime || !endTime || !date))}
                                     className={`w-full py-4 text-white rounded-2xl font-bold text-lg hover:shadow-lg active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4 ${type === 'task'
                                         ? 'bg-primary hover:shadow-primary/30'
                                         : type === 'reminder'
