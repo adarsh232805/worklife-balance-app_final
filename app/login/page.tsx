@@ -1,15 +1,30 @@
 'use client';
 
-import { useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useState, useTransition } from 'react';
 import { authenticate, register } from '@/lib/actions';
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function LoginPage() {
     const [isLogin, setIsLogin] = useState(true);
-    const [errorMessage, dispatchAuth] = useActionState(authenticate, undefined);
-    const [registerMessage, dispatchRegister] = useActionState(register, undefined);
+    const [isPending, startTransition] = useTransition();
+    const [errorMessage, setErrorMessage] = useState<string | undefined>('');
+    const [registerMessage, setRegisterMessage] = useState<string | undefined>('');
+
+    const handleLogin = async (formData: FormData) => {
+        setErrorMessage('');
+        startTransition(async () => {
+            const result = await authenticate(undefined, formData);
+            if (result) setErrorMessage(result);
+        });
+    };
+
+    const handleRegister = async (formData: FormData) => {
+        setRegisterMessage('');
+        startTransition(async () => {
+            const result = await register(undefined, formData);
+            if (result) setRegisterMessage(result);
+        });
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center p-4">
@@ -55,7 +70,7 @@ export default function LoginPage() {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 20 }}
-                            action={dispatchAuth}
+                            action={handleLogin}
                             className="space-y-4"
                         >
                             <Input name="email" type="email" placeholder="Email Address" required />
@@ -67,7 +82,7 @@ export default function LoginPage() {
                                 </div>
                             )}
 
-                            <SubmitButton label="Log In" />
+                            <SubmitButton label="Log In" pending={isPending} />
                         </motion.form>
                     ) : (
                         <motion.form
@@ -75,7 +90,7 @@ export default function LoginPage() {
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
-                            action={dispatchRegister}
+                            action={handleRegister}
                             className="space-y-4"
                         >
                             {registerMessage === 'success' ? (
@@ -95,7 +110,7 @@ export default function LoginPage() {
                                         </div>
                                     )}
 
-                                    <SubmitButton label="Create Account" />
+                                    <SubmitButton label="Create Account" pending={isPending} />
                                 </>
                             )}
                         </motion.form>
@@ -115,8 +130,7 @@ function Input({ ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
     );
 }
 
-function SubmitButton({ label }: { label: string }) {
-    const { pending } = useFormStatus();
+function SubmitButton({ label, pending }: { label: string, pending: boolean }) {
     return (
         <button
             type="submit"

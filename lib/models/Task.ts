@@ -6,6 +6,7 @@ export interface ITask extends Document {
     priority: 'High' | 'Medium' | 'Low';
     time: Date;
     userId: string;
+    category: 'Work' | 'Personal' | 'Health' | 'Learning';
     createdAt: Date;
     updatedAt: Date;
 }
@@ -21,6 +22,11 @@ const TaskSchema: Schema = new Schema(
         },
         time: { type: Date, required: true },
         userId: { type: String, required: true },
+        category: {
+            type: String,
+            enum: ['Work', 'Personal', 'Health', 'Learning'],
+            default: 'Work'
+        }
     },
     {
         timestamps: true,

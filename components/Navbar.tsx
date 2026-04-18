@@ -1,11 +1,13 @@
 "use client";
 
-import { Bell, Search, User, LogOut } from "lucide-react";
+import { Bell, Search, User, LogOut, Settings } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { logOut } from "@/lib/actions";
 import Image from "next/image";
 import Link from "next/link";
 import LevelProgress from "./LevelProgress";
+
+import NotificationCenter from "./NotificationCenter";
 
 export default function Navbar() {
     const { data: session } = useSession();
@@ -33,10 +35,8 @@ export default function Navbar() {
                 <button className="p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
                     <Search size={20} />
                 </button>
-                <button className="p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors relative">
-                    <Bell size={20} />
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                </button>
+
+                <NotificationCenter />
 
                 {user && <LevelProgress />}
 
@@ -57,6 +57,13 @@ export default function Navbar() {
                                 <p className="text-sm font-semibold truncate">{user.name}</p>
                                 <p className="text-xs text-slate-500 truncate">{user.email}</p>
                             </div>
+                            <Link
+                                href="/settings"
+                                className="w-full flex items-center gap-2 px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+                            >
+                                <Settings size={16} />
+                                Settings
+                            </Link>
                             <button
                                 onClick={() => logOut()}
                                 className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors rounded-b-xl"

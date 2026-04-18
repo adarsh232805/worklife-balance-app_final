@@ -14,6 +14,9 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const date = searchParams.get('date');
 
+        const startDateParam = searchParams.get('startDate');
+        const endDateParam = searchParams.get('endDate');
+
         const query: any = { userId: session.user.id };
         if (date) {
             // Filter by date (ignoring time for the "day" view)
@@ -22,6 +25,11 @@ export async function GET(request: Request) {
             const endDate = new Date(date);
             endDate.setHours(23, 59, 59, 999);
             query.time = { $gte: startDate, $lte: endDate };
+        } else if (startDateParam && endDateParam) {
+            const start = new Date(startDateParam);
+            const end = new Date(endDateParam);
+            end.setHours(23, 59, 59, 999);
+            query.time = { $gte: start, $lte: end };
         }
 
         const tasks = await Task.find(query).sort({ time: 1 });

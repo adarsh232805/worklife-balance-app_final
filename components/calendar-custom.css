@@ -1,0 +1,191 @@
+/* Modern Marketing-Grade Calendar Styles */
+
+/* Base Typography & Variables */
+:root {
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+.rbc-calendar {
+    font-family: inherit;
+    color: #334155;
+}
+
+/* === Main Glass Container (Applying to parent usually, but ensuring internal resets) === */
+
+/* Header Month/Year Title */
+.rbc-toolbar {
+    display: none !important;
+    /* We use our custom toolbar */
+}
+
+/* Month View Grid */
+.rbc-month-view {
+    border: none !important;
+    background: transparent;
+}
+
+.rbc-header {
+    padding: 16px 0;
+    font-weight: 700;
+    color: #64748b;
+    border-bottom: none !important;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+}
+
+.rbc-month-row {
+    overflow: visible !important;
+    transition: all 0.2s ease;
+}
+
+/* Cell Styling */
+.rbc-day-bg {
+    border-left: 1px solid rgba(241, 245, 249, 0.6) !important;
+    transition: background-color 0.2s ease;
+}
+
+.rbc-day-bg:hover {
+    background-color: rgba(248, 250, 252, 0.8);
+}
+
+.rbc-off-range-bg {
+    background: rgba(248, 250, 252, 0.6) !important;
+    background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.rbc-today {
+    background-color: rgba(240, 249, 255, 0.7) !important;
+    /* Subtle blue tint */
+}
+
+/* Events */
+.rbc-event {
+    background: transparent !important;
+    padding: 2px !important;
+}
+
+.rbc-event-content {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(4px);
+}
+
+.rbc-event-content:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    z-index: 50;
+}
+
+/* Time/Week View Overrides */
+.rbc-time-view {
+    border: none !important;
+    border-radius: 1rem;
+}
+
+.rbc-time-header {
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+
+.rbc-time-content {
+    border-top: none !important;
+}
+
+.rbc-timeslot-group {
+    border-bottom: 1px solid rgba(241, 245, 249, 0.6) !important;
+}
+
+.rbc-day-slot .rbc-time-slot {
+    border-top: 1px solid rgba(248, 250, 252, 0.6) !important;
+}
+
+.rbc-current-time-indicator {
+    background-color: #ef4444 !important;
+    height: 2px !important;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+    position: relative;
+    z-index: 100;
+}
+
+.rbc-current-time-indicator::before {
+    content: "NOW";
+    position: absolute;
+    left: -35px;
+    top: -50%;
+    transform: translateY(-50%);
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+.rbc-time-view-resources .rbc-time-gutter,
+.rbc-time-view-resources .rbc-time-header-getter {
+    border-right: 1px solid rgba(241, 245, 249, 0.6) !important;
+}
+
+/* Remove ugly borders */
+.rbc-month-row+.rbc-month-row {
+    border-top: 1px solid rgba(241, 245, 249, 0.6) !important;
+}
+
+.rbc-header+.rbc-header {
+    border-left: 1px solid rgba(241, 245, 249, 0.6) !important;
+}
+
+/* Scrollbar styling for the calendar container */
+.rbc-time-content::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.rbc-time-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.rbc-time-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.rbc-time-content::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.rbc-row-segment {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Custom Scrollbar Hiding */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

@@ -1,0 +1,23 @@
+components/wellness/BreathingWidget.tsx(82,21): error TS2322: Type '{ inhale: { scale: number; opacity: number; transition: { duration: number; ease: string; }; }; hold: { scale: number; opacity: number; transition: { duration: number; ease: string; }; }; exhale: { scale: number; opacity: number; transition: { ...; }; }; }' is not assignable to type 'Variants'.
+  Property 'inhale' is incompatible with index signature.
+    Type '{ scale: number; opacity: number; transition: { duration: number; ease: string; }; }' is not assignable to type 'Variant'.
+      Type '{ scale: number; opacity: number; transition: { duration: number; ease: string; }; }' is not assignable to type 'TargetAndTransition'.
+        Type '{ scale: number; opacity: number; transition: { duration: number; ease: string; }; }' is not assignable to type '{ transition?: Transition<any>; transitionEnd?: ResolvedValues; }'.
+          Types of property 'transition' are incompatible.
+            Type '{ duration: number; ease: string; }' is not assignable to type 'Transition<any>'.
+              Type '{ duration: number; ease: string; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                Type '{ duration: number; ease: string; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                  Types of property 'ease' are incompatible.
+                    Type 'string' is not assignable to type 'Easing | Easing[]'.
+components/wellness/BreathingWidget.tsx(87,21): error TS2322: Type '{ inhale: { scale: number; opacity: number; transition: { duration: number; ease: string; }; }; hold: { scale: number; opacity: number; transition: { duration: number; ease: string; }; }; exhale: { scale: number; opacity: number; transition: { ...; }; }; }' is not assignable to type 'Variants'.
+  Property 'inhale' is incompatible with index signature.
+    Type '{ scale: number; opacity: number; transition: { duration: number; ease: string; }; }' is not assignable to type 'Variant'.
+      Type '{ scale: number; opacity: number; transition: { duration: number; ease: string; }; }' is not assignable to type 'TargetAndTransition'.
+        Type '{ scale: number; opacity: number; transition: { duration: number; ease: string; }; }' is not assignable to type '{ transition?: Transition<any>; transitionEnd?: ResolvedValues; }'.
+          Types of property 'transition' are incompatible.
+            Type '{ duration: number; ease: string; }' is not assignable to type 'Transition<any>'.
+              Type '{ duration: number; ease: string; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                Type '{ duration: number; ease: string; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                  Types of property 'ease' are incompatible.
+                    Type 'string' is not assignable to type 'Easing | Easing[]'.
+lib/models/User.ts(83,17): error TS1117: An object literal cannot have multiple properties with the same name.

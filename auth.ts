@@ -11,7 +11,13 @@ async function getUser(email: string): Promise<User | undefined> {
     try {
         await dbConnect();
         const user = await UserModel.findOne({ email }).lean();
-        return user as unknown as User;
+        if (user) {
+            return {
+                ...user,
+                id: (user._id as any).toString(),
+            } as unknown as User;
+        }
+        return undefined;
     } catch (error) {
         console.error('Failed to fetch user:', error);
         throw new Error('Failed to fetch user.');
@@ -23,20 +29,33 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
     providers: [
         Credentials({
             async authorize(credentials) {
+                console.log("[Auth] Raw credentials:", credentials);
                 const parsedCredentials = z
                     .object({ email: z.string().email(), password: z.string().min(6) })
                     .safeParse(credentials);
 
                 if (parsedCredentials.success) {
                     const { email, password } = parsedCredentials.data;
+                    console.log("[Auth] Looking up email:", email);
                     const user = await getUser(email);
-                    if (!user) return null;
+                    if (!user) {
+                        console.log("[Auth] User not found in DB.");
+                        return null;
+                    }
 
-                    const passwordsMatch = await bcrypt.compare(password, user.password);
-                    if (passwordsMatch) return user;
+                    console.log("[Auth] User found! Comparing hashes...");
+                    const passwordsMatch = await bcrypt.compare(password, user.password as string);
+                    if (passwordsMatch) {
+                        console.log("[Auth] Passwords match! Returning user.");
+                        return { id: user.id, name: user.name, email: user.email };
+                    } else {
+                        console.log("[Auth] Passwords did not match.");
+                    }
+                } else {
+                    console.log("[Auth] Zod parse failed:", parsedCredentials.error);
                 }
 
-                console.log('Invalid credentials');
+                console.log('[Auth] Invalid credentials catch-all reached.');
                 return null;
             },
         }),

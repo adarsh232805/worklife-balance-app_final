@@ -24,6 +24,15 @@ export async function POST(request: Request) {
             // XP = Duration (mins) * XP_PER_MIN
             const xpEarned = Math.floor(body.duration * XP_VALUES.FOCUS_MINUTE);
             await updateUserProgress(session.user.id, xpEarned);
+
+            // Create Notification
+            const { createNotification } = await import('@/lib/notifications');
+            await createNotification(
+                session.user.id,
+                "Focus Session Complete",
+                `You focused for ${body.duration} minutes and earned ${xpEarned} XP!`,
+                "achievement"
+            );
         }
 
         return NextResponse.json(activity, { status: 201 });
@@ -46,12 +55,20 @@ export async function GET(request: Request) {
 
         const query: any = { userId: session.user.id };
 
+        const startDateParam = searchParams.get('startDate');
+        const endDateParam = searchParams.get('endDate');
+
         if (date) {
             const startDate = new Date(date);
             startDate.setHours(0, 0, 0, 0);
             const endDate = new Date(date);
             endDate.setHours(23, 59, 59, 999);
             query.startTime = { $gte: startDate, $lte: endDate };
+        } else if (startDateParam && endDateParam) {
+            const start = new Date(startDateParam);
+            const end = new Date(endDateParam);
+            end.setHours(23, 59, 59, 999);
+            query.startTime = { $gte: start, $lte: end };
         }
 
         if (type) {

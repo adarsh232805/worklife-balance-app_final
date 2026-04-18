@@ -1,130 +1,282 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Calendar,
-  Clock,
-  Flame,
-  Bell,
-  Plus,
-  Play,
-  Coffee,
-  Smile,
-  Meh,
-  Frown,
-  ArrowRight,
+  Sun,
+  Moon,
+  CloudRain,
   CheckCircle2,
-  Circle
+  Clock,
+  Target,
+  Flame,
+  Zap,
+  Plus,
+  Calendar,
+  Bell,
+  Trophy,
+  Activity,
+  Droplet,
+  Heart,
+  Coffee,
+  Crown,
+  Footprints,
+  Utensils,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import TaskModal from "@/components/TaskModal";
+import { useSession } from "next-auth/react";
+import AICoachWidget from "@/components/AICoachWidget";
+import NotificationCenter from "@/components/NotificationCenter";
+import LeaderboardWidget from "@/components/games/LeaderboardWidget";
+import WeeklySummary from "@/components/WeeklySummary";
 
 /* ================= HELPERS ================= */
 
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 5) return "Good Night";
+  if (hour < 12) return "Good Morning";
+  if (hour < 18) return "Good Afternoon";
+  return "Good Evening";
+};
+
+const todayString = () => {
+  return new Date().toLocaleDateString("en-US", { weekday: 'long', month: 'long', day: 'numeric' });
+};
+
 const QUOTES = [
-  "Focus on progress, not perfection.",
-  "Small steps every day lead to big results.",
-  "आज का फोकस, कल की सफलता।",
-  "मेहनत इतनी करो कि किस्मत भी साथ दे।",
+  "Small steps every day.",
+  "Focus on the process.",
+  "You are doing great.",
+  "Keep moving forward.",
+  "Make today count."
 ];
 
-function todayString() {
-  return new Date().toLocaleDateString(undefined, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
-}
+/* ================= COMPONENTS ================= */
 
-function getGreeting() {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
-}
+function StatCard({ icon, label, value, subLabel, color, trend }: any) {
+  const colorStyles = {
+    indigo: "bg-indigo-50 text-indigo-600 border-indigo-100",
+    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
+    amber: "bg-amber-50 text-amber-600 border-amber-100",
+    rose: "bg-rose-50 text-rose-600 border-rose-100",
+    cyan: "bg-cyan-50 text-cyan-600 border-cyan-100",
+    purple: "bg-purple-50 text-purple-600 border-purple-100",
+  }[color as string] || "bg-slate-50 text-slate-600 border-slate-100";
 
-/* ================= COMPONENT ================= */
+  return (
+    <div className={`p-4 rounded-[2rem] border ${colorStyles} flex flex-col justify-between h-32 hover:scale-[1.02] transition-transform`}>
+      <div className="flex justify-between items-start">
+        <div className="p-2 bg-white rounded-xl shadow-sm bg-opacity-60 backdrop-blur-sm">
+          {icon}
+        </div>
+        {trend === 'up' && <span className="text-[10px] font-bold bg-white/50 px-2 py-1 rounded-full">↑</span>}
+      </div>
+      <div>
+        <div className="text-2xl font-black leading-none mb-1">{value}</div>
+        <div className="text-[10px] font-bold uppercase opacity-60 tracking-wider text-slate-900">{label}</div>
+        <div className="text-[10px] font-medium opacity-50">{subLabel}</div>
+      </div>
+    </div>
+  );
+}
 
 export default function TodayView() {
+  const { data: session } = useSession();
   const [quote, setQuote] = useState("");
   const [mood, setMood] = useState<string | null>(null);
-  const [reminders, setReminders] = useState<any[]>([]);
+  const [streak, setStreak] = useState(0);
+  const [level, setLevel] = useState(1);
+  const [xp, setXp] = useState(0);
+  const [tasks, setTasks] = useState<any[]>([]); // Renamed from reminders to tasks for clarity
+  const [reminders, setReminders] = useState<any[]>([]); // Actual reminders
+  const [events, setEvents] = useState<any[]>([]);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [healthData, setHealthData] = useState<any>(null);
   const [focusStats, setFocusStats] = useState({ minutes: 0, score: "N/A" });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('day');
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
 
-  const fetchTasks = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
-      // Fetch tasks for today
-      const today = new Date().toISOString().split("T")[0];
-      const data = await api.tasks.getAll(today);
-      setReminders(data);
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      setLoading(true);
 
-  const fetchAnalytics = useCallback(async () => {
-    try {
-      const data = await api.analytics.get();
-      const mins = data.focusMinutes || 0;
+      let start = new Date(currentDate);
+      let end = new Date(currentDate);
+
+      if (viewMode === 'day') {
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+      } else if (viewMode === 'week') {
+        const day = start.getDay();
+        const diff = start.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+        start.setDate(diff);
+        start.setHours(0, 0, 0, 0);
+        end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        end.setHours(23, 59, 59, 999);
+      } else if (viewMode === 'month') {
+        start.setDate(1);
+        start.setHours(0, 0, 0, 0);
+        end = new Date(start);
+        end.setMonth(start.getMonth() + 1);
+        end.setDate(0);
+        end.setHours(23, 59, 59, 999);
+      }
+
+      const startStr = start.toISOString();
+      const endStr = end.toISOString();
+
+      // Parallel Fetch
+      const [tasksRes, eventsRes, analyticsRes, progressRes, activityRes, healthRes, remindersRes] = await Promise.all([
+        api.tasks.getAll(undefined, startStr, endStr),
+        api.calendar.getEvents(undefined, startStr, endStr),
+        api.analytics.get(),
+        api.user.getProgress(),
+        api.activity.getHistory(undefined, startStr, endStr),
+        api.health.getDaily(undefined, startStr, endStr).catch(() => null),
+        api.reminders.getAll(startStr, endStr) // Fetch actual reminders
+      ]);
+
+      setTasks(tasksRes);
+      setEvents(eventsRes);
+      setActivities(activityRes);
+      setReminders(remindersRes || []);
+      setStreak(progressRes.streak || 0);
+      setLevel(progressRes.level || 1);
+      setXp(progressRes.xp || 0);
+
+      // Fix: Map API response structure to component state
+      setHealthData({
+        waterIntake: healthRes?.totals?.water || 0,
+        sleepHours: healthRes?.logs?.find((l: any) => l.type === 'sleep')?.value || 0,
+        steps: healthRes?.logs?.filter((l: any) => l.type === 'walk' || l.type === 'run')
+          .reduce((acc: number, curr: any) => acc + ((curr.value || 0) * (curr.type === 'run' ? 160 : 100)), 0) || 0,
+        logs: healthRes?.logs || [] // Store full logs for timeline
+      });
+
+      // Analytics
+      const mins = analyticsRes?.today?.focusMinutes || 0;
       let score = "Needs Attention";
       if (mins >= 120) score = "Excellent";
       else if (mins >= 60) score = "Good";
-
       setFocusStats({ minutes: mins, score });
+
     } catch (error) {
-      console.error("Error fetching analytics:", error);
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  }, [currentDate, viewMode]);
 
   /* LOAD DATA */
   useEffect(() => {
     setQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
-    fetchTasks();
-    fetchAnalytics();
+    fetchData();
 
-    // Simple polling for "real-time" feel (every 30s)
-    const interval = setInterval(() => {
-      fetchTasks();
-      fetchAnalytics();
-    }, 30000);
-
+    // Polling
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
-  }, [fetchTasks, fetchAnalytics]);
+  }, [fetchData]);
 
   const handleAddTask = async (task: any) => {
     try {
       await api.tasks.create(task);
-      fetchTasks(); // Refresh list immediately
+      fetchData();
     } catch (error) {
       console.error("Error adding task:", error);
     }
   };
 
   const toggleTask = async (id: string, currentStatus: boolean) => {
+    // Optimistic
+    setTasks(prev => prev.map(r => r._id === id ? { ...r, completed: !currentStatus } : r));
     try {
-      // Optimistic update
-      setReminders(prev => prev.map(r => r._id === id ? { ...r, completed: !currentStatus } : r));
       await api.tasks.update(id, { completed: !currentStatus });
-      fetchTasks();
-    } catch (error) {
-      console.error("Error updating task:", error);
-      fetchTasks(); // Revert on error
+    } catch (e) {
+      fetchData(); // revert
     }
   };
 
+  const handleAddEvent = async (event: any) => {
+    try {
+      await api.calendar.createEvent(event);
+      fetchData();
+    } catch (error) {
+      console.error("Error adding event:", error);
+    }
+  };
+
+  // MERGE ITEMS FOR TIMELINE
+  const handleAddReminder = async (reminder: any) => {
+    try {
+      await api.reminders.create(reminder);
+      fetchData();
+    } catch (error) {
+      console.error("Error adding reminder:", error);
+    }
+  };
+
+  const toggleReminder = async (id: string, currentStatus: boolean) => {
+    // Optimistic
+    setReminders(prev => prev.map(r => r._id === id || r.id === id ? { ...r, completed: !currentStatus } : r));
+    try {
+      await api.reminders.update(id, { completed: !currentStatus });
+    } catch (e) {
+      fetchData(); // revert
+    }
+  };
+
+  const timelineItems = [
+    ...tasks.map(t => ({
+      ...t,
+      type: 'task',
+    })),
+    ...reminders.map(r => ({
+      ...r,
+      type: 'reminder',
+      time: new Date(r.time).toISOString() // Reminders use timestamp
+    })),
+    ...events.map(e => ({
+      ...e,
+      type: 'event',
+    })),
+    ...activities.map(a => ({
+      ...a,
+      type: 'focus', // Activity type
+      title: `${a.type} Session`,
+      description: `${a.duration} minutes completed`,
+    })),
+    ...(healthData?.logs || []).filter((h: any) => ['workout', 'yoga', 'exercise', 'run', 'walk'].includes(h.type)).map((h: any) => ({
+      ...h,
+      type: 'workout',
+      title: h.type.charAt(0).toUpperCase() + h.type.slice(1),
+      value: h.value,
+      unit: h.unit || 'mins',
+      time: h.date // Health logs use 'date' field
+    }))
+  ].sort((a, b) => new Date(a.time || a.startTime || a.date).getTime() - new Date(b.time || b.startTime || b.date).getTime());
+
+  // Group by Date for Week/Month views
+  const groupedItems = timelineItems.reduce((groups: any, item: any) => {
+    const date = (item.time || item.startTime || item.date).split('T')[0];
+    if (!groups[date]) {
+      groups[date] = [];
+    }
+    groups[date].push(item);
+    return groups;
+  }, {});
+
+
   const container = {
     hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
   };
 
   const item = {
@@ -132,249 +284,387 @@ export default function TodayView() {
     show: { opacity: 1, y: 0 }
   };
 
+  const pendingTasks = tasks.filter(r => !r.completed).length;
+  const nextEvent = events.find(e => new Date(e.startTime) > new Date());
+
   return (
     <>
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="space-y-8 pb-20 md:pb-0"
-      >
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 pb-24 md:pb-8 p-1 font-sans">
 
-        {/* HEADER */}
-        <motion.div variants={item} className="flex justify-between items-end">
+        {/* HEADER AREA */}
+        <div className="flex justify-between items-center px-4 md:px-0">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-              {getGreeting()} 👋
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{todayString()}</p>
+            <h1 className="text-3xl font-black text-slate-900 leading-none">
+              {getGreeting()}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">{session?.user?.name?.split(' ')[0]}</span>
             </h1>
-            <p className="text-muted-foreground mt-2 font-medium">{todayString()}</p>
           </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="md:hidden p-3 bg-primary text-white rounded-full shadow-lg shadow-primary/30"
-          >
-            <Plus />
-          </button>
-        </motion.div>
+          <div className="flex items-center gap-4">
+            <NotificationCenter />
+            <div className="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm overflow-hidden">
+              <img src={session?.user?.image || `https://ui-avatars.com/api/?name=${session?.user?.name}`} alt="User" />
+            </div>
+          </div>
+        </div>
 
-        {/* OVERVIEW CARDS */}
-        <motion.div variants={item} className="grid md:grid-cols-3 gap-6">
+        {/* HERO / INSIGHTS ROW */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div variants={item} className="lg:col-span-2">
+            <AICoachWidget />
+          </motion.div>
 
-          <Card
-            icon={<Flame className="text-orange-500" />}
-            title="Focus Today"
-            value={`${focusStats.minutes} min`}
-            subtitle={focusStats.score}
-            trend="+12% from yesterday"
-          />
+          <motion.div variants={item} className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-sm flex flex-col justify-center items-center text-center">
+              <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center mb-3">
+                <Flame size={20} fill="currentColor" />
+              </div>
+              <span className="text-3xl font-black text-slate-800 leading-none">{streak}</span>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">Day Streak</span>
+            </div>
+            <div className="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-sm flex flex-col justify-center items-center text-center">
+              <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-500 flex items-center justify-center mb-3">
+                <Crown size={20} />
+              </div>
+              <span className="text-3xl font-black text-slate-800 leading-none">{level}</span>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">Level</span>
+            </div>
+            <button className="col-span-2 py-4 rounded-[2rem] bg-slate-900 text-white font-black shadow-lg hover:scale-[1.02] transition-transform active:scale-95 flex items-center justify-center gap-2"
+              onClick={() => setIsModalOpen(true)}
+            >
+              <Plus size={20} /> New Activity
+            </button>
+          </motion.div>
+        </div>
 
-          <Card
-            icon={<Bell className="text-indigo-600" />}
-            title="Tasks"
-            value={reminders.filter(r => !r.completed).length}
-            subtitle="Pending today"
-            trend="You're on track"
-          />
+        {/* BENTO GRID LAYOUT */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          <Card
-            icon={<Calendar className="text-green-600" />}
-            title="Balance"
-            value={focusStats.score}
-            subtitle="Work-Life Status"
-            trend="Looking healthy"
-          />
-
-        </motion.div>
-
-        <div className="grid lg:grid-cols-3 gap-6">
-
-          {/* LEFT COLUMN */}
+          {/* LEFT COLUMN: ACTIVITY & HEALTH */}
           <div className="lg:col-span-2 space-y-6">
-            {/* TODAY TASKS */}
-            <motion.div variants={item}>
-              <Section
-                title="Your Tasks"
-                icon={<Clock className="text-primary" />}
-                action={
-                  <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-2 text-sm font-semibold text-primary bg-primary/10 px-4 py-2 rounded-full hover:bg-primary/20 transition-colors"
-                  >
-                    <Plus size={16} /> Add New
+
+            {/* STATS ROW */}
+            <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatCard
+                icon={<Target />}
+                label="Tasks"
+                value={pendingTasks}
+                subLabel="Remaining"
+                color="indigo"
+                trend="neutral"
+              />
+              <StatCard
+                icon={<Clock />}
+                label="Focus"
+                value={`${focusStats.minutes}m`}
+                subLabel={focusStats.score}
+                color="amber"
+                trend="up"
+              />
+              <StatCard
+                icon={<Droplet />}
+                label="Hydration"
+                value={healthData?.waterIntake || 0}
+                subLabel="mL Drunk"
+                color="cyan"
+                trend="up"
+              />
+              <StatCard
+                icon={<Moon />}
+                label="Sleep"
+                value={healthData?.sleepHours || 0}
+                subLabel="Hours"
+                color="purple"
+                trend="neutral"
+              />
+            </motion.div>
+
+            {/* TIMELINE */}
+            <motion.div variants={item} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8 min-h-[500px] relative overflow-hidden">
+              {/* Background Decoration */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-bl-[10rem] -z-0" />
+
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 relative z-10 gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-lg shadow-slate-900/20 shrink-0">
+                    <Calendar size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-slate-800">Your Activity</h3>
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">
+                      {viewMode === 'day' ? currentDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }) :
+                        viewMode === 'week' ? `Week of ${currentDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}` :
+                          currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-xl self-start md:self-auto">
+                  <button onClick={() => setViewMode('day')} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === 'day' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}>Day</button>
+                  <button onClick={() => setViewMode('week')} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === 'week' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}>Week</button>
+                  <button onClick={() => setViewMode('month')} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === 'month' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}>Month</button>
+                </div>
+
+                <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl self-start md:self-auto">
+                  <button onClick={() => {
+                    const newDate = new Date(currentDate);
+                    if (viewMode === 'day') newDate.setDate(newDate.getDate() - 1);
+                    if (viewMode === 'week') newDate.setDate(newDate.getDate() - 7);
+                    if (viewMode === 'month') newDate.setMonth(newDate.getMonth() - 1);
+                    setCurrentDate(newDate);
+                  }} className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all text-slate-500"><ChevronLeft size={16} /></button>
+                  <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1 hover:bg-white hover:shadow-sm rounded-lg transition-all text-xs font-bold uppercase text-slate-500">Today</button>
+                  <button onClick={() => {
+                    const newDate = new Date(currentDate);
+                    if (viewMode === 'day') newDate.setDate(newDate.getDate() + 1);
+                    if (viewMode === 'week') newDate.setDate(newDate.getDate() + 7);
+                    if (viewMode === 'month') newDate.setMonth(newDate.getMonth() + 1);
+                    setCurrentDate(newDate);
+                  }} className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all text-slate-500"><ChevronRight size={16} /></button>
+                </div>
+              </div>
+
+              {loading ? (
+                <div className="space-y-6 animate-pulse relative z-10 w-full">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="flex gap-4">
+                      <div className="w-16 h-4 bg-slate-100 rounded-full mt-2" />
+                      <div className="flex-1 h-24 bg-slate-50 rounded-3xl" />
+                    </div>
+                  ))}
+                </div>
+              ) : timelineItems.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-80 text-center border-2 border-dashed border-slate-100 rounded-[2rem] bg-slate-50/30 relative z-10">
+                  <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-6">
+                    <CheckCircle2 size={40} className="text-emerald-500" />
+                  </div>
+                  <h4 className="text-xl font-bold text-slate-800">Clear Schedule</h4>
+                  <p className="text-slate-400 max-w-xs mt-2 leading-relaxed">No activities found for this period.</p>
+                  <button onClick={() => setIsModalOpen(true)} className="mt-8 px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
+                    Add Activity
                   </button>
-                }
-              >
-                {loading ? (
-                  <div className="p-8 text-center text-muted-foreground">Loading tasks...</div>
-                ) : reminders.length === 0 ? (
-                  <div className="p-8 text-center text-muted-foreground bg-slate-50/50 rounded-xl border border-dashed">
-                    <p>No tasks for today. Enjoy your day! 🎉</p>
+                </div>
+              ) : (
+                <div className="relative space-y-8 py-2 z-10 pl-4 md:pl-0">
+                  {/* Timeline Render Logic */}
+                  {Object.entries(groupedItems).map(([dateKey, items]: [string, any[]], groupIdx) => (
+                    <div key={dateKey} className="relative">
+                      {/* Date Header for Week/Month View */}
+                      {viewMode !== 'day' && (
+                        <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md py-2 mb-4 border-b border-slate-100">
+                          <h4 className="font-bold text-slate-900 text-lg flex items-center gap-2">
+                            {new Date(dateKey).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}
+                            <span className="text-xs font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{items.length} items</span>
+                          </h4>
+                        </div>
+                      )}
+
+                      <div className="space-y-6">
+                        {items.map((item: any, idx: number) => {
+                          const isPast = new Date(item.time || item.startTime) < new Date();
+                          const timeStr = new Date(item.time || item.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                          return (
+                            <div key={`${dateKey}-${idx}`} className="relative flex gap-4 md:gap-10 group">
+                              {/* Time Column */}
+                              <div className="hidden md:flex w-16 flex-col items-end pt-5 shrink-0">
+                                <span className={`text-sm font-bold ${isPast ? "text-slate-300" : "text-slate-600"}`}>
+                                  {timeStr.split(' ')[0]}
+                                </span>
+                                <span className="text-[10px] font-bold uppercase text-slate-300">
+                                  {timeStr.split(' ')[1]}
+                                </span>
+                              </div>
+
+                              {/* Timeline Line */}
+                              <div className="absolute left-[7px] md:left-[87px] top-10 bottom-[-24px] w-[2px] bg-slate-100 last:bottom-0" />
+
+                              {/* Timeline Dot */}
+                              <div className={`absolute left-[0px] md:left-[80px] top-6 w-4 h-4 rounded-full border-[3px] border-white shadow-sm transition-all z-20 ${item.type === 'event' ? 'bg-rose-500 ring-4 ring-rose-50' :
+                                item.completed ? 'bg-emerald-500 ring-4 ring-emerald-50' :
+                                  item.type === 'focus' ? 'bg-amber-500 ring-4 ring-amber-50' :
+                                    item.type === 'workout' ? 'bg-cyan-500 ring-4 ring-cyan-50' :
+                                      item.type === 'workout' ? 'bg-cyan-500 ring-4 ring-cyan-50' :
+                                        item.type === 'reminder' ? 'bg-purple-500 ring-4 ring-purple-50' :
+                                          'bg-indigo-500 ring-4 ring-indigo-50'
+                                }`} />
+
+                              {/* Card */}
+                              <div className={`flex-1 relative p-6 rounded-[2rem] transition-all duration-300 border group-hover:-translate-y-1 ${item.completed
+                                ? "bg-slate-50/50 border-transparent opacity-60 grayscale-[0.5]"
+                                : "bg-white border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 hover:border-indigo-100"
+                                }`}>
+                                <div className="flex justify-between items-start">
+                                  <div className="space-y-1 w-full">
+                                    {/* Mobile Time */}
+                                    <div className="flex items-center gap-2 mb-2 md:hidden">
+                                      <span className="text-xs font-bold text-slate-400">{timeStr}</span>
+                                    </div>
+
+                                    {/* Badges */}
+                                    <div className="flex flex-wrap gap-2 mb-3">
+                                      {item.type === 'event' && <span className="px-2.5 py-1 bg-rose-50 text-rose-600 text-[10px] font-black uppercase rounded-lg tracking-wide border border-rose-100">Event</span>}
+                                      {item.type === 'focus' && <span className="px-2.5 py-1 bg-amber-50 text-amber-600 text-[10px] font-black uppercase rounded-lg tracking-wide border border-amber-100">Focus</span>}
+                                      {item.type === 'workout' && <span className="px-2.5 py-1 bg-cyan-50 text-cyan-600 text-[10px] font-black uppercase rounded-lg tracking-wide border border-cyan-100">Workout</span>}
+                                      {item.type === 'reminder' && <span className="px-2.5 py-1 bg-purple-50 text-purple-600 text-[10px] font-black uppercase rounded-lg tracking-wide border border-purple-100 mt-1">Reminder</span>}
+                                      {item.category && <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-black uppercase rounded-lg tracking-wide border border-slate-200">{item.category}</span>}
+                                    </div>
+
+                                    <div className="flex justify-between w-full">
+                                      <div>
+                                        <h4 className={`text-lg font-bold leading-snug ${item.completed ? "line-through decoration-2 decoration-slate-300" : "text-slate-800"}`}>
+                                          {item.title}
+                                        </h4>
+                                        {item.description && <p className="text-sm text-slate-500 leading-relaxed max-w-md mt-1">{item.description}</p>}
+                                        {item.value && <p className="text-sm font-bold text-slate-600 mt-1">{item.value} {item.unit || ''}</p>}
+                                      </div>
+
+                                      {/* Action/Icon */}
+                                      <div className="shrink-0 ml-4">
+                                        {item.type === 'task' ? (
+                                          <button
+                                            onClick={() => toggleTask(item._id, item.completed)}
+                                            className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${item.completed
+                                              ? "text-emerald-500 bg-emerald-50"
+                                              : "text-slate-300 bg-slate-50 hover:bg-indigo-600 hover:text-white hover:shadow-lg hover:shadow-indigo-500/20"
+                                              }`}
+                                          >
+                                            {item.completed ? <CheckCircle2 size={24} className="fill-emerald-500 text-white" /> : <div className="w-6 h-6 rounded-full border-2 border-current" />}
+                                          </button>
+                                        ) : item.type === 'focus' ? (
+                                          <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center">
+                                            <Zap size={24} fill="currentColor" />
+                                          </div>
+                                        ) : item.type === 'workout' ? (
+                                          <div className="w-12 h-12 bg-cyan-50 text-cyan-500 rounded-2xl flex items-center justify-center">
+                                            <Activity size={24} />
+                                          </div>
+                                        ) : item.type === 'reminder' ? (
+                                          <div className="w-12 h-12 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center">
+                                            <Bell size={24} />
+                                          </div>
+                                        ) : (
+                                          <div className="w-12 h-12 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center">
+                                            <Calendar size={24} />
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+
+                </div>
+              )}
+            </motion.div>
+          </div>
+
+          {/* RIGHT COLUMN: WIDGETS */}
+          <div className="space-y-6">
+
+            {/* LEADERBOARD WIDGET */}
+            <div className="h-[400px]">
+              <LeaderboardWidget />
+            </div>
+
+            {/* WEEKLY TRENDS */}
+            <div className="bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-sm">
+              <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wide mb-2 flex items-center gap-2">
+                <Activity size={16} className="text-indigo-500" /> Weekly Focus
+              </h4>
+              <WeeklySummary />
+            </div>
+
+            {/* UP NEXT WIDGET (Compact) */}
+            <motion.div variants={item} className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-xl shadow-slate-900/10 group">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/20 blur-[60px] rounded-full -mr-10 -mt-10 group-hover:bg-indigo-500/30 transition-colors" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-rose-500/10 blur-[50px] rounded-full -ml-10 -mb-10 group-hover:bg-rose-500/20 transition-colors" />
+
+              <div className="relative z-10 flex flex-col h-full justify-between">
+                <div className="flex items-center gap-3 opacity-80 backdrop-blur-sm bg-white/5 w-fit px-3 py-1 rounded-full border border-white/5">
+                  <Bell size={16} className="text-indigo-300" />
+                  <span className="text-xs font-bold uppercase tracking-wider">Up Next</span>
+                </div>
+
+                {nextEvent ? (
+                  <div className="mt-6">
+                    <div className="text-4xl font-black mb-1 tacking-tighter">{new Date(nextEvent.startTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</div>
+                    <h3 className="text-lg font-bold leading-tight mb-4 line-clamp-2">{nextEvent.title}</h3>
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    {reminders.map((r: any) => (
-                      <div
-                        key={r._id}
-                        onClick={() => toggleTask(r._id, r.completed)}
-                        className={`flex justify-between items-center border rounded-xl p-4 transition-all cursor-pointer group ${r.completed
-                            ? 'bg-slate-50 border-slate-100 opacity-60'
-                            : 'bg-white border-slate-100 hover:shadow-md hover:border-slate-200'
-                          }`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <button className={`transition-colors ${r.completed ? 'text-green-500' : 'text-slate-300 group-hover:text-primary'}`}>
-                            {r.completed ? <CheckCircle2 size={24} /> : <Circle size={24} />}
-                          </button>
-                          <div>
-                            <p className={`font-medium ${r.completed ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
-                              {r.title}
-                            </p>
-                            <div className="flex items-center gap-3 mt-1">
-                              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Clock size={12} />
-                                {new Date(r.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </p>
-                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${r.priority === 'High' ? 'bg-red-50 text-red-600' :
-                                  r.priority === 'Medium' ? 'bg-blue-50 text-blue-600' :
-                                    'bg-green-50 text-green-600'
-                                }`}>
-                                {r.priority}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="mt-8">
+                    <div className="text-2xl font-bold mb-2">Free Time</div>
+                    <p className="text-indigo-200 text-sm leading-relaxed">No immediate events scheduled.</p>
                   </div>
                 )}
-              </Section>
-            </motion.div>
-
-            {/* QUICK ACTIONS */}
-            <motion.div variants={item}>
-              <Section title="Quick Actions" icon={<Play className="text-primary" />}>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div onClick={() => { }}><QuickAction icon={<Play />} label="Start Focus" color="bg-indigo-50 text-indigo-600" /></div>
-                  <div onClick={() => setIsModalOpen(true)}><QuickAction icon={<Plus />} label="Add Task" color="bg-pink-50 text-pink-600" /></div>
-                  <QuickAction icon={<Calendar />} label="Calendar" color="bg-orange-50 text-orange-600" />
-                  <QuickAction icon={<Coffee />} label="Take Break" color="bg-teal-50 text-teal-600" />
-                </div>
-              </Section>
-            </motion.div>
-          </div>
-
-          {/* RIGHT COLUMN */}
-          <div className="space-y-6">
-            {/* WELLBEING */}
-            <motion.div variants={item}>
-              <Section title="Mood Check" icon={<Smile className="text-primary" />}>
-                <div className="flex justify-between gap-2">
-                  <Mood icon={<Smile size={28} />} label="Good" active={mood === "good"} onClick={() => setMood("good")} />
-                  <Mood icon={<Meh size={28} />} label="Okay" active={mood === "ok"} onClick={() => setMood("ok")} />
-                  <Mood icon={<Frown size={28} />} label="Stressed" active={mood === "bad"} onClick={() => setMood("bad")} />
-                </div>
-
-                {mood && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="mt-4 p-4 rounded-xl bg-primary/5 text-primary text-sm font-medium"
-                  >
-                    {mood === "bad"
-                      ? "Take a short break and breathe. You got this! 🌿"
-                      : "Great to hear! Keep that momentum going! 💪"}
-                  </motion.div>
-                )}
-              </Section>
-            </motion.div>
-
-            {/* MOTIVATION */}
-            <motion.div variants={item}>
-              <div className="relative overflow-hidden rounded-3xl p-8 text-center bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xl shadow-indigo-200">
-                <div className="relative z-10">
-                  <p className="text-lg font-medium leading-relaxed">“{quote}”</p>
-                  <div className="mt-4 w-12 h-1 bg-white/30 mx-auto rounded-full" />
-                </div>
-
-                {/* Decorative circles */}
-                <div className="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-                <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
               </div>
             </motion.div>
-          </div>
 
+            {/* WELLNESS SNAPSHOT */}
+            <motion.div variants={item} className="bg-white rounded-[2.5rem] border border-emerald-100 shadow-lg shadow-emerald-500/5 p-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16" />
+              <div className="relative z-10">
+                <h4 className="font-black text-slate-800 text-lg mb-6 flex items-center gap-2">
+                  <Heart className="text-emerald-500 fill-emerald-500" size={20} /> Wellness
+                </h4>
+
+                <div className="space-y-4">
+                  {/* Hydration Bar */}
+                  <div>
+                    <div className="flex justify-between text-xs font-bold mb-1">
+                      <span className="text-slate-500 flex items-center gap-1"><Droplet size={12} /> Water</span>
+                      <span className="text-sky-600">{healthData?.waterIntake || 0} / 2500ml</span>
+                    </div>
+                    <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-sky-400 rounded-full" style={{ width: `${Math.min(((healthData?.waterIntake || 0) / 2500) * 100, 100)}%` }} />
+                    </div>
+                  </div>
+
+                  {/* Steps Bar */}
+                  <div>
+                    <div className="flex justify-between text-xs font-bold mb-1">
+                      <span className="text-slate-500 flex items-center gap-1"><Footprints size={12} /> Steps</span>
+                      <span className="text-orange-500">{healthData?.steps || 0} / 10k</span>
+                    </div>
+                    <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-orange-400 rounded-full" style={{ width: `${Math.min(((healthData?.steps || 0) / 10000) * 100, 100)}%` }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* MOOD & QUICK ACTIONS */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Mood */}
+              <motion.div variants={item} className="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-3">Daily Mood</p>
+                <div className="flex justify-center gap-1">
+                  <button onClick={() => setMood("good")} className={`text-2xl p-2 rounded-xl transition-all ${mood === "good" ? "bg-emerald-100 scale-110" : "grayscale opacity-50 hover:grayscale-0 hover:opacity-100 hover:bg-slate-50"}`}>😊</button>
+                  <button onClick={() => setMood("ok")} className={`text-2xl p-2 rounded-xl transition-all ${mood === "ok" ? "bg-amber-100 scale-110" : "grayscale opacity-50 hover:grayscale-0 hover:opacity-100 hover:bg-slate-50"}`}>😐</button>
+                  <button onClick={() => setMood("bad")} className={`text-2xl p-2 rounded-xl transition-all ${mood === "bad" ? "bg-rose-100 scale-110" : "grayscale opacity-50 hover:grayscale-0 hover:opacity-100 hover:bg-slate-50"}`}>😫</button>
+                </div>
+              </motion.div>
+
+              {/* Quick Action */}
+              <motion.div variants={item} className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-[2rem] p-5 shadow-lg text-white flex flex-col items-center justify-center text-center cursor-pointer hover:scale-[1.03] transition-transform active:scale-95" onClick={() => setIsModalOpen(true)}>
+                <Zap size={24} className="mb-2" fill="currentColor" />
+                <span className="text-xs font-black uppercase tracking-wide">Quick Log</span>
+              </motion.div>
+            </div>
+
+          </div>
         </div>
+
       </motion.div>
 
-      <TaskModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onAddTask={handleAddTask}
-      />
+      <TaskModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAddTask={handleAddTask} onAddEvent={handleAddEvent} onAddReminder={handleAddReminder} />
     </>
   );
+
 }
-
-/* ================= UI HELPERS ================= */
-
-function Card({ icon, title, value, subtitle, trend }: any) {
-  return (
-    <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-      <div className="flex justify-between items-start mb-4">
-        <div className="p-3 rounded-2xl bg-slate-50">{icon}</div>
-        <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">{trend}</span>
-      </div>
-      <div>
-        <p className="text-slate-500 font-medium mb-1">{title}</p>
-        <h3 className="text-3xl font-bold text-slate-800 tracking-tight">{value}</h3>
-        <p className="text-sm text-slate-400 mt-1">{subtitle}</p>
-      </div>
-    </div>
-  );
-}
-
-function Section({ title, icon, action, children }: any) {
-  return (
-    <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 md:p-8 h-full">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-xl">
-            {icon}
-          </div>
-          <h3 className="text-lg font-bold text-slate-800">
-            {title}
-          </h3>
-        </div>
-        {action}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function QuickAction({ icon, label, color }: any) {
-  return (
-    <button className={`${color} bg-opacity-50 hover:bg-opacity-100 transition-all duration-300 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 h-32 w-full group`}>
-      <div className="p-3 bg-white rounded-xl shadow-sm group-hover:scale-110 transition-transform duration-300">
-        {icon}
-      </div>
-      <span className="text-sm font-semibold">{label}</span>
-    </button>
-  );
-}
-
-function Mood({ icon, label, onClick, active }: any) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex-1 flex flex-col items-center gap-3 p-4 rounded-2xl transition-all duration-300 ${active
-        ? "bg-primary text-white shadow-lg shadow-primary/30 scale-105"
-        : "bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-        }`}
-    >
-      {icon}
-      <span className="text-sm font-medium">{label}</span>
-    </button>
-  );
-}
-

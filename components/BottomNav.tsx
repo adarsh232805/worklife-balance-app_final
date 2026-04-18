@@ -8,7 +8,8 @@ import {
     Bell,
     Gamepad2,
     Music,
-    BarChart3
+    BarChart3,
+    Sparkles
 } from "lucide-react";
 
 interface BottomNavProps {
@@ -18,6 +19,7 @@ interface BottomNavProps {
 
 const NAV_ITEMS = [
     { id: "today", icon: Home, label: "Home" },
+    { id: "coach", icon: Sparkles, label: "Coach" },
     { id: "focus", icon: Focus, label: "Focus" },
     { id: "games", icon: Gamepad2, label: "Play" },
     { id: "analytics", icon: BarChart3, label: "Stats" },

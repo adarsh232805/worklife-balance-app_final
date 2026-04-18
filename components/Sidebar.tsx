@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import {
     Home,
+    Sparkles,
     Focus,
     Calendar,
     Bell,
@@ -11,16 +12,19 @@ import {
     BarChart3,
     Settings,
     LogOut,
-    Menu
+    Menu,
+    Heart
 } from "lucide-react";
 import { useState } from "react";
 
 const NAV_ITEMS = [
     { id: "today", label: "Today", icon: Home },
+    { id: "coach", label: "AI Coach", icon: Sparkles },
     { id: "focus", label: "Focus", icon: Focus },
     { id: "calendar", label: "Calendar", icon: Calendar },
     { id: "reminders", label: "Reminders", icon: Bell },
     { id: "games", label: "Games", icon: Gamepad2 },
+    { id: "wellness", label: "Wellness", icon: Heart },
     { id: "media", label: "Media", icon: Music },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
 ];
@@ -67,8 +71,8 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
                             key={item.id}
                             onClick={() => setActiveTab(item.id)}
                             className={`w-full flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden ${isActive
-                                    ? "bg-primary text-white shadow-lg shadow-primary/30"
-                                    : "hover:bg-white/50 text-slate-600 hover:text-slate-900"
+                                ? "bg-primary text-white shadow-lg shadow-primary/30"
+                                : "hover:bg-white/50 text-slate-600 hover:text-slate-900"
                                 }`}
                         >
                             <item.icon size={22} className={isActive ? "text-white" : "text-slate-500 group-hover:text-primary transition-colors"} />
