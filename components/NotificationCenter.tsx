@@ -9,6 +9,7 @@ export default function NotificationCenter() {
     const [notifications, setNotifications] = useState<any[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [isMounted, setIsMounted] = useState(false);
 
     const fetchNotifications = async () => {
         try {
@@ -23,6 +24,7 @@ export default function NotificationCenter() {
     };
 
     useEffect(() => {
+        setIsMounted(true);
         fetchNotifications();
         const interval = setInterval(fetchNotifications, 60000); // Poll every minute
         return () => clearInterval(interval);
@@ -119,9 +121,11 @@ export default function NotificationCenter() {
                                                         <h4 className={`text-sm font-bold truncate ${!n.read ? 'text-slate-800' : 'text-slate-600'}`}>
                                                             {n.title}
                                                         </h4>
-                                                        <span className="text-[10px] text-slate-400 whitespace-nowrap bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100/50">
-                                                            {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                        </span>
+                                                        {isMounted && (
+                                                            <span className="text-[10px] text-slate-400 whitespace-nowrap bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100/50">
+                                                                {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">{n.message}</p>
                                                 </div>

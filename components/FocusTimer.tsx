@@ -277,7 +277,7 @@ export default function FocusTimer({
                 )}
 
                 {/* TIMER DISPLAY */}
-                <div className="relative group mb-12">
+                <div className="relative group mb-12 transform scale-[0.85] md:scale-100 transition-transform">
                     {/* Progress Ring */}
                     <svg className="w-80 h-80 transform -rotate-90">
                         <circle

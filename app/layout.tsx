@@ -11,11 +11,14 @@ const outfit = Outfit({
 export const metadata = {
   title: "WorkLife+ | Balance Your Life",
   description: "A modern productivity and wellbeing application.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={outfit.variable}>
+    <html lang="en" className={outfit.variable} data-scroll-behavior="smooth">
       <body className="min-h-screen bg-background text-foreground font-sans antialiased overflow-x-hidden">
         <Providers>
           {children}

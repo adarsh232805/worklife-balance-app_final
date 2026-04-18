@@ -153,6 +153,35 @@ export default function AICoachTab() {
                     <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-400/20 rounded-full blur-[100px] mix-blend-multiply"></div>
                 </div>
 
+                {/* Mobile Header (Hidden on Desktop) */}
+                <div className="md:hidden flex items-center justify-between p-4 bg-white/80 backdrop-blur-md border-b border-slate-100 z-20">
+                    <div className="flex items-center gap-2">
+                        <div className="bg-gradient-to-br from-violet-600 to-indigo-600 p-1.5 rounded-lg">
+                            <Bot className="text-white" size={18} />
+                        </div>
+                        <h2 className="font-bold text-slate-800">Genius AI</h2>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-500 uppercase">
+                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                        Live
+                    </div>
+                </div>
+
+                {/* Mobile Suggestions (Hidden on Desktop) */}
+                <div className="md:hidden flex overflow-x-auto gap-2 p-3 hide-scrollbar relative z-20 bg-white/40 border-b border-slate-100/50">
+                    {suggestions.map((item, i) => (
+                        <button
+                            key={i}
+                            onClick={() => handleSend(item.prompt)}
+                            disabled={isTyping}
+                            className="whitespace-nowrap flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-100 shadow-sm text-xs font-bold text-slate-600 active:scale-95 transition-all"
+                        >
+                            <item.icon size={14} className="text-indigo-500" />
+                            {item.label}
+                        </button>
+                    ))}
+                </div>
+
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 relative z-10 scroll-smooth" ref={scrollRef}>
                     <AnimatePresence initial={false}>

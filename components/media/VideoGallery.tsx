@@ -137,9 +137,12 @@ export default function VideoGallery() {
                     >
                         <div className="relative aspect-video overflow-hidden">
                             <img
-                                src={`https://img.youtube.com/vi/${video.id}/mqdefault.jpg`}
+                                src={`https://img.youtube.com/vi/${video.id}/hqdefault.jpg`}
                                 alt={video.title}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).src = `https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop`;
+                                }}
                             />
                             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
                                 <div className="bg-white/20 backdrop-blur-md p-4 rounded-full group-hover:scale-110 transition-transform shadow-xl">

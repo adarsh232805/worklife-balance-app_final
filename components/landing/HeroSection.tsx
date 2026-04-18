@@ -6,7 +6,7 @@ import { ArrowRight, Play } from "lucide-react";
 
 export default function HeroSection() {
     return (
-        <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        <section className="relative pt-24 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
             {/* Background Gradients */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full z-0 pointer-events-none">
                 <div className="absolute top-20 left-1/4 w-[500px] h-[500px] bg-indigo-200/30 rounded-full blur-[100px] animate-pulse" />
@@ -26,14 +26,14 @@ export default function HeroSection() {
                         v2.0 is now live w/ AI Coach
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+                    <h1 className="text-4xl md:text-7xl font-bold tracking-tight text-slate-900 leading-[1.1]">
                         Master Your <br className="hidden md:block" />
                         <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
                             Work-Life Balance
                         </span>
                     </h1>
 
-                    <p className="text-xl md:text-2xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-lg md:text-2xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
                         The all-in-one platform to boost productivity, track wellness, and achieve your goals with AI-powered insights.
                     </p>
 
@@ -53,12 +53,12 @@ export default function HeroSection() {
 
                     {/* Social Proof */}
                     <div className="pt-12">
-                        <p className="text-sm text-slate-500 font-medium mb-6">TRUSTED BY HIGH PERFORMERS AT</p>
-                        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-                            <span className="text-xl font-bold font-serif">Acme Corp</span>
-                            <span className="text-xl font-bold font-sans">GlobalTech</span>
-                            <span className="text-xl font-bold font-mono">Infinite</span>
-                            <span className="text-xl font-bold">Starlight</span>
+                        <p className="text-sm text-slate-500 font-medium mb-6 uppercase tracking-widest">Trusted By High Performers At</p>
+                        <div className="flex flex-wrap justify-center items-center gap-6 md:gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                            <span className="text-lg md:text-xl font-bold font-serif">Acme Corp</span>
+                            <span className="text-lg md:text-xl font-bold font-sans">GlobalTech</span>
+                            <span className="text-lg md:text-xl font-bold font-mono">Infinite</span>
+                            <span className="text-lg md:text-xl font-bold">Starlight</span>
                         </div>
                     </div>
                 </motion.div>
@@ -69,7 +69,7 @@ export default function HeroSection() {
                     initial={{ opacity: 0, y: 100, rotateX: 20 }}
                     animate={{ opacity: 1, y: 0, rotateX: 0 }}
                     transition={{ duration: 1, delay: 0.4, type: "spring" }}
-                    className="mt-20 max-w-6xl mx-auto relative perspective-1000"
+                    className="mt-12 md:mt-20 max-w-6xl mx-auto relative perspective-1000 scale-95 md:scale-100"
                 >
                     <div className="relative rounded-xl overflow-hidden shadow-2xl bg-white border border-slate-200">
                         {/* Browser Chrome */}

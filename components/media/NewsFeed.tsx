@@ -62,8 +62,9 @@ export default function NewsFeed() {
         const feedUrl = FEEDS[language][category];
         try {
             const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
+            if (!res.ok) throw new Error("API responded with an error");
             const data = await res.json();
-            if (data.items) {
+            if (data.status === "ok" && data.items) {
                 // Clean up data
                 const cleaned = data.items.map((item: any) => ({
                     ...item,
@@ -72,9 +73,12 @@ export default function NewsFeed() {
                     source: data.feed.title
                 }));
                 setNews(cleaned);
+            } else {
+                throw new Error("Invalid data format or status not ok");
             }
         } catch (error) {
             console.error("Failed to fetch news", error);
+            setNews([]); // Clear news on error
         } finally {
             setLoading(false);
         }

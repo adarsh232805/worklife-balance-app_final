@@ -74,9 +74,9 @@ const CustomToolbarComponent = (props: any) => {
   const goToCurrent = () => onNavigate("TODAY");
 
   return (
-    <div className="flex flex-col xl:flex-row items-center justify-between mb-8 gap-4 w-full">
-      <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto justify-between xl:justify-start">
-        <div className="flex bg-white/40 backdrop-blur-md rounded-2xl p-1.5 border border-white/50 shadow-sm shrink-0">
+    <div className="flex flex-col lg:flex-row items-center justify-between mb-8 gap-4 w-full">
+      <div className="flex flex-col md:flex-row items-center gap-4 w-full lg:w-auto justify-between lg:justify-start">
+        <div className="flex bg-white/40 backdrop-blur-md rounded-2xl p-1.5 border border-white/50 shadow-sm shrink-0 w-full md:w-auto justify-between md:justify-start">
           <button onClick={goToBack} className="p-2 hover:bg-white/80 rounded-xl transition-all text-slate-600 hover:text-indigo-600">
             <ChevronLeft size={20} />
           </button>
@@ -87,17 +87,17 @@ const CustomToolbarComponent = (props: any) => {
             <ChevronRight size={20} />
           </button>
         </div>
-        <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight text-right md:text-left truncate">
+        <h2 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight text-center md:text-left truncate w-full md:w-auto">
           {label}
         </h2>
       </div>
 
-      <div className="flex bg-slate-100/50 backdrop-blur-md rounded-2xl p-1.5 border border-white/50 shadow-inner w-full xl:w-auto overflow-x-auto hide-scrollbar shrink-0">
+      <div className="flex bg-slate-100/50 backdrop-blur-md rounded-2xl p-1.5 border border-white/50 shadow-inner w-full lg:w-auto overflow-x-auto hide-scrollbar shrink-0">
         {Object.values(Views).map((name) => (
           <button
             key={name as string}
             onClick={() => onView(name)}
-            className={`relative px-4 py-2 text-xs font-bold rounded-xl transition-all capitalize whitespace-nowrap z-10 flex-1 xl:flex-none text-center ${view === name ? "text-white shadow-lg shadow-indigo-500/30" : "text-slate-500 hover:text-indigo-600 hover:bg-white/50"}`}
+            className={`relative px-4 py-2 text-[10px] md:text-xs font-bold rounded-xl transition-all capitalize whitespace-nowrap z-10 flex-1 lg:flex-none text-center ${view === name ? "text-white shadow-lg shadow-indigo-500/30" : "text-slate-500 hover:text-indigo-600 hover:bg-white/50"}`}
           >
             {view === name && (
               <motion.div
@@ -133,6 +133,13 @@ export default function CalendarTab() {
   const [filteredEvents, setFilteredEvents] = useState<any[]>([]);
   const [view, setView] = useState<View>(Views.MONTH);
   const [date, setDate] = useState(new Date());
+  const [isMounted, setIsMounted] = useState(false);
+  const [greeting, setGreeting] = useState("");
+
+  useEffect(() => {
+    setIsMounted(true);
+    setGreeting(GREETINGS[Math.floor(Math.random() * GREETINGS.length)]);
+  }, []);
 
   // Sidebar State
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
@@ -265,14 +272,18 @@ export default function CalendarTab() {
                   Hello, <br />
                   <span className="text-indigo-200">{session?.user?.name?.split(' ')[0] || 'User'}</span>
                 </h3>
-                <p className="text-indigo-100/80 text-sm font-medium border-l-2 border-indigo-400/50 pl-3 line-clamp-1">
-                  {GREETINGS[Math.floor(Math.random() * GREETINGS.length)]}
-                </p>
+                {isMounted && (
+                  <p className="text-indigo-100/80 text-sm font-medium border-l-2 border-indigo-400/50 pl-3 line-clamp-1">
+                    {greeting}
+                  </p>
+                )}
               </div>
-              <div className="w-16 h-16 shrink-0 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center shadow-lg transform rotate-3 group-hover:rotate-0 transition-all duration-300">
-                <span className="text-xs font-bold uppercase text-indigo-200 tracking-wider">{format(new Date(), 'MMM')}</span>
-                <span className="text-2xl font-black leading-none">{format(new Date(), 'd')}</span>
-              </div>
+              {isMounted && (
+                <div className="w-16 h-16 shrink-0 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center shadow-lg transform rotate-3 group-hover:rotate-0 transition-all duration-300">
+                  <span className="text-xs font-bold uppercase text-indigo-200 tracking-wider">{format(new Date(), 'MMM')}</span>
+                  <span className="text-2xl font-black leading-none">{format(new Date(), 'd')}</span>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-3 text-sm font-semibold bg-black/20 rounded-xl p-3 backdrop-blur-sm w-fit max-w-full">
