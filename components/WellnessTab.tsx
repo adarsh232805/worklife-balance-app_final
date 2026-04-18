@@ -18,6 +18,7 @@ export default function WellnessTab() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showGoalModal, setShowGoalModal] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
     const [data, setData] = useState<{
         stats: { calories: number; water: number; exercise: number; yoga: number; meditation: number; workout: number };
         logs: any[];
@@ -238,7 +239,7 @@ export default function WellnessTab() {
                                     <div>
                                         <h4 className="font-bold text-slate-800 capitalize">{log.title || log.type}</h4>
                                         <p className="text-xs text-slate-500 font-medium">
-                                            {new Date(log.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            {isMounted ? new Date(log.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--"}
                                         </p>
                                     </div>
                                 </div>

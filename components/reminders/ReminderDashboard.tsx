@@ -15,6 +15,11 @@ export default function ReminderDashboard() {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [filterCategory, setFilterCategory] = useState<string>("all");
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // Load from API
     useEffect(() => {
@@ -132,10 +137,10 @@ export default function ReminderDashboard() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-2">
                 <div>
                     <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
-                        Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}
+                        Good {!isMounted ? '...' : (new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening')}
                     </h1>
                     <p className="text-slate-500 mt-2 flex items-center gap-2">
-                        {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                        {isMounted ? new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) : "Loading date..."}
                         <span className="h-1 w-1 rounded-full bg-slate-300"></span>
                         <span className="text-indigo-600 font-medium">
                             {reminders.filter(r => !r.completed && r.time < Date.now() + 86400000).length} tasks for today

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Bell, Search, User, LogOut, Settings, Menu } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { logOut } from "@/lib/actions";
@@ -16,6 +17,11 @@ interface NavbarProps {
 export default function Navbar({ setIsMobileMenuOpen }: NavbarProps) {
     const { data: session } = useSession();
     const user = session?.user;
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     return (
         <header className="sticky top-0 z-30 w-full glass border-b md:bg-transparent md:border-b-0 md:backdrop-filter-none md:static px-6 py-4 flex items-center justify-between">
@@ -35,7 +41,7 @@ export default function Navbar({ setIsMobileMenuOpen }: NavbarProps) {
             {/* Desktop Helper / Spacer */}
             <div className="hidden md:block">
                 <h2 className="text-2xl font-semibold text-slate-800">
-                    Welcome back, {user?.name?.split(' ')[0] || 'Guest'}
+                    Welcome back, {isMounted ? (user?.name?.split(' ')[0] || 'Guest') : '...'}
                 </h2>
                 <p className="text-slate-500 text-sm">Let's be productive today.</p>
             </div>

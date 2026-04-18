@@ -393,9 +393,11 @@ export default function TodayView() {
                   <div>
                     <h3 className="text-2xl font-black text-slate-800">Your Activity</h3>
                     <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">
-                      {viewMode === 'day' ? currentDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }) :
+                      {!isMounted ? "Loading..." : (
+                        viewMode === 'day' ? currentDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }) :
                         viewMode === 'week' ? `Week of ${currentDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}` :
-                          currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+                          currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+                      )}
                     </p>
                   </div>
                 </div>
@@ -454,10 +456,10 @@ export default function TodayView() {
                       {viewMode !== 'day' && (
                         <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md py-2 mb-4 border-b border-slate-100">
                           <h4 className="font-bold text-slate-900 text-lg flex items-center gap-2">
-                            {(() => {
+                            {isMounted ? (() => {
                               const [y, m, d] = dateKey.split('-');
                               return new Date(Number(y), Number(m) - 1, Number(d)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
-                            })()}
+                            })() : "..."}
                             <span className="text-xs font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{items.length} items</span>
                           </h4>
                         </div>
@@ -465,8 +467,8 @@ export default function TodayView() {
 
                       <div className="space-y-6">
                         {items.map((item: any, idx: number) => {
-                          const isPast = new Date(item.time || item.startTime) < new Date();
-                          const timeStr = new Date(item.time || item.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                          const isPast = isMounted ? new Date(item.time || item.startTime) < new Date() : false;
+                          const timeStr = isMounted ? new Date(item.time || item.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--";
 
                           return (
                             <div key={`${dateKey}-${idx}`} className="relative flex gap-4 md:gap-10 group">
@@ -598,7 +600,9 @@ export default function TodayView() {
 
                 {nextEvent ? (
                   <div className="mt-6">
-                    <div className="text-4xl font-black mb-1 tacking-tighter">{new Date(nextEvent.startTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</div>
+                    <div className="text-4xl font-black mb-1 tacking-tighter">
+                        {isMounted ? new Date(nextEvent.startTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : "--:--"}
+                    </div>
                     <h3 className="text-lg font-bold leading-tight mb-4 line-clamp-2">{nextEvent.title}</h3>
                   </div>
                 ) : (
