@@ -5,11 +5,11 @@
 
   **A state-of-the-art productivity and wellness platform built for high-achievers who value mental health.**
 
-  [![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://worklife-balance-app-final-gaun.vercel.app/)
+  [![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://worklife-balance-app-final-rspd.vercel.app/)
   [![GitHub](https://img.shields.io/badge/Open%20Source-GitHub-indigo?style=for-the-badge&logo=github)](https://github.com/adarsh232805/worklife-balance-app_final)
   [![Next.js](https://img.shields.io/badge/Built%20with-Next.js%2016-blue?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 
-  [🚀 View Live Demo](https://worklife-balance-app-final-gaun.vercel.app/) • [📂 Explore Docs](#-features) • [🛠️ Report Bug](https://github.com/adarsh232805/worklife-balance-app_final/issues)
+  [🚀 View Live Demo](https://worklife-balance-app-final-rspd.vercel.app/) • [📂 Explore Docs](#-features) • [🛠️ Report Bug](https://github.com/adarsh232805/worklife-balance-app_final/issues)
 </div>
 
 ---
