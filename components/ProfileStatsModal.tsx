@@ -55,14 +55,13 @@ export default function ProfileStatsModal({
                 />
 
                 {/* Modal */}
-                <motion.div
                     initial={{ scale: 0.9, opacity: 0, y: 20 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                    className="relative bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl"
+                    className="relative bg-white w-full max-w-md max-h-[90vh] overflow-y-auto hide-scrollbar rounded-3xl shadow-2xl flex flex-col"
                 >
                     {/* Header with Gradient */}
-                    <div className="relative h-32 bg-gradient-to-br from-indigo-600 to-purple-700 p-6 flex justify-end">
+                    <div className="relative shrink-0 h-32 bg-gradient-to-br from-indigo-600 to-purple-700 p-6 flex justify-end">
                         <button
                             onClick={onClose}
                             className="relative z-20 p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors backdrop-blur-md"
@@ -144,8 +143,8 @@ export default function ProfileStatsModal({
 
                                     <div className="bg-purple-50 p-4 rounded-2xl border border-purple-100 flex flex-col items-center justify-center text-center">
                                         <Trophy className="text-purple-600 mb-2" size={24} />
-                                        <span className="text-2xl font-black text-slate-800 mb-1">{Math.floor(stats.xp / 1000)}k</span>
-                                        <span className="text-xs font-bold text-purple-600 uppercase tracking-wide">Total XP</span>
+                                        <span className="text-2xl font-black text-slate-800 mb-1 leading-none">{Math.floor(stats.xp / 1000)}k</span>
+                                        <span className="text-[10px] font-bold text-purple-600 uppercase tracking-wide">Total XP</span>
                                     </div>
                                 </div>
                             </div>

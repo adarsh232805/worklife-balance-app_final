@@ -59,13 +59,13 @@ export default function LevelProgress() {
                 className="flex items-center gap-4 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-200 hover:bg-white hover:shadow-md transition-all cursor-pointer group"
             >
                 {/* LEVEL BADGE */}
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 to-orange-500 text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-white group-hover:scale-110 transition-transform">
+                <div className="flex items-center gap-1 md:gap-2">
+                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-tr from-yellow-400 to-orange-500 text-white flex items-center justify-center font-bold text-[10px] md:text-xs shadow-sm ring-2 ring-white group-hover:scale-110 transition-transform">
                         {progress.level}
                     </div>
                     <div className="flex flex-col text-left">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider leading-none">Lvl</span>
-                        <span className="text-xs font-bold text-slate-700 leading-none group-hover:text-indigo-600 transition-colors">
+                        <span className="text-[8px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wider leading-none">Lvl</span>
+                        <span className="text-[10px] md:text-xs font-bold text-slate-700 leading-none group-hover:text-indigo-600 transition-colors">
                             {progress.level <= 5 ? "Novice" : progress.level <= 10 ? "Pro" : "Master"}
                         </span>
                     </div>
@@ -81,9 +81,9 @@ export default function LevelProgress() {
                 </div>
 
                 {/* STREAK */}
-                <div className="flex items-center gap-1.5 pl-2 border-l border-slate-200" title="Daily Streak">
-                    <Flame size={14} className={`${progress.streak > 0 ? 'text-orange-500 fill-orange-500' : 'text-slate-300 group-hover:text-orange-400'}`} />
-                    <span className="text-xs font-bold text-slate-700 group-hover:text-slate-900">{progress.streak}</span>
+                <div className="flex items-center gap-1 md:gap-1.5 md:pl-2 md:border-l md:border-slate-200" title="Daily Streak">
+                    <Flame size={12} className={`${progress.streak > 0 ? 'text-orange-500 fill-orange-500' : 'text-slate-300 group-hover:text-orange-400'}`} />
+                    <span className="text-[10px] md:text-xs font-bold text-slate-700 group-hover:text-slate-900">{progress.streak}</span>
                 </div>
             </button>
         </>

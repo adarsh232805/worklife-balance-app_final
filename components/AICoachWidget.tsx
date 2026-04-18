@@ -38,7 +38,7 @@ export default function AICoachWidget() {
     };
 
     return (
-        <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-lg group">
+        <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 text-white relative overflow-hidden shadow-lg group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 group-hover:scale-110 transition-transform duration-700" />
 
             <div className="relative z-10 h-full flex flex-col justify-between">
@@ -56,7 +56,7 @@ export default function AICoachWidget() {
                         </div>
                     ) : (
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <p className="text-lg md:text-xl font-medium leading-relaxed mb-4">
+                            <p className="text-base md:text-xl font-medium leading-relaxed mb-4">
                                 "{data?.tip || "Stay consistent! Small daily habits lead to big changes."}"
                             </p>
                         </div>

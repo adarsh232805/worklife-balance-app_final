@@ -129,7 +129,7 @@ export default function ReminderDashboard() {
             <NotificationManager reminders={reminders} />
 
             {/* HEADER */}
-            <div className="flex flex-col md:flex-row justify-between items-end gap-4 mb-2">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-2">
                 <div>
                     <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
                         Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}
@@ -144,7 +144,7 @@ export default function ReminderDashboard() {
                 </div>
                 <button
                     onClick={() => { setEditingReminder(null); setIsModalOpen(true); }}
-                    className="flex items-center gap-2 bg-slate-900 text-white px-6 py-3.5 rounded-2xl hover:scale-105 transition-all duration-300 shadow-xl shadow-slate-900/20 active:scale-95 group"
+                    className="w-full md:w-auto flex justify-center items-center gap-2 bg-slate-900 text-white px-6 py-3.5 rounded-2xl hover:scale-105 transition-all duration-300 shadow-xl shadow-slate-900/20 active:scale-95 group"
                 >
                     <Plus size={20} className="group-hover:rotate-90 transition-transform" />
                     <span className="font-medium">New Reminder</span>
@@ -198,8 +198,8 @@ export default function ReminderDashboard() {
                 <div className="h-px bg-slate-100 mx-4 my-2"></div>
 
                 {/* Filters */}
-                <div className="flex flex-wrap gap-2 px-2 pb-2">
-                    <div className="flex-1 min-w-[200px]">
+                <div className="flex flex-col sm:flex-row gap-2 px-2 pb-2">
+                    <div className="flex-1 w-full">
                         <input
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
@@ -207,11 +207,11 @@ export default function ReminderDashboard() {
                             className="w-full bg-slate-50/50 hover:bg-white focus:bg-white p-2.5 px-4 rounded-xl border-none transition-all text-sm font-medium"
                         />
                     </div>
-                    <div>
+                    <div className="w-full sm:w-auto">
                         <select
                             value={filterCategory}
                             onChange={e => setFilterCategory(e.target.value)}
-                            className="bg-slate-50/50 hover:bg-white focus:bg-white p-2.5 px-4 rounded-xl border-none transition-all text-sm font-semibold text-slate-600 cursor-pointer outline-none"
+                            className="w-full sm:w-auto bg-slate-50/50 hover:bg-white focus:bg-white p-2.5 px-4 rounded-xl border-none transition-all text-sm font-semibold text-slate-600 cursor-pointer outline-none"
                         >
                             <option value="all">📂 All Categories</option>
                             <option value="work">💼 Work</option>

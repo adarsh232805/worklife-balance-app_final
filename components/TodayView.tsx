@@ -69,7 +69,7 @@ function StatCard({ icon, label, value, subLabel, color, trend }: any) {
   }[color as string] || "bg-slate-50 text-slate-600 border-slate-100";
 
   return (
-    <div className={`p-4 rounded-[2rem] border ${colorStyles} flex flex-col justify-between h-32 hover:scale-[1.02] transition-transform`}>
+    <div className={`p-4 rounded-[1.5rem] md:rounded-[2rem] border ${colorStyles} flex flex-col justify-between h-28 md:h-32 hover:scale-[1.02] transition-transform shadow-sm`}>
       <div className="flex justify-between items-start">
         <div className="p-2 bg-white rounded-xl shadow-sm bg-opacity-60 backdrop-blur-sm">
           {icon}
@@ -293,23 +293,17 @@ export default function TodayView() {
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 pb-8 p-1 font-sans">
 
         {/* HEADER AREA */}
-        <div className="flex justify-between items-center px-4 md:px-0">
+        <div className="flex justify-between items-center px-2 md:px-0">
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{todayString()}</p>
-            <h1 className="text-3xl font-black text-slate-900 leading-none">
+            <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{todayString()}</p>
+            <h1 className="text-2xl md:text-3xl font-black text-slate-900 leading-none">
               {getGreeting()}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">{session?.user?.name?.split(' ')[0]}</span>
             </h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <NotificationCenter />
-            <div className="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm overflow-hidden">
-              <img src={session?.user?.image || `https://ui-avatars.com/api/?name=${session?.user?.name}`} alt="User" />
-            </div>
           </div>
         </div>
 
         {/* HERO / INSIGHTS ROW */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           <motion.div variants={item} className="lg:col-span-2">
             <AICoachWidget />
           </motion.div>

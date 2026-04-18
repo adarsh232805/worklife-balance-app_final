@@ -118,17 +118,17 @@ export default function WellnessTab() {
         <div className="space-y-8 pb-8">
 
             {/* HERDER & SCORE */}
-            <section className="relative overflow-hidden bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-indigo-500/20">
+            <section className="relative overflow-hidden bg-slate-900 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 text-white shadow-2xl shadow-indigo-500/20">
                 <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
                 <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-indigo-900/50 to-transparent" />
-                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
                     <div className="text-center md:text-left">
-                        <h2 className="text-3xl font-black mb-1">Wellness Dashboard</h2>
-                        <div className="flex items-center gap-4">
+                        <h2 className="text-2xl md:text-3xl font-black mb-1">Wellness Dashboard</h2>
+                        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
                             <p className="text-indigo-200 text-sm font-medium">Tracking your daily journey</p>
                             <button
                                 onClick={() => setShowGoalModal(true)}
-                                className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-full text-xs font-bold text-white transition-colors"
+                                className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-full text-[10px] font-bold text-white transition-colors"
                             >
                                 🎯 Edit Goals
                             </button>

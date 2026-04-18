@@ -41,7 +41,7 @@ export default function LevelUpModal({
                         animate={{ scale: 1, opacity: 1, rotate: 0 }}
                         exit={{ scale: 0.5, opacity: 0, rotate: 10 }}
                         transition={{ type: "spring", damping: 15 }}
-                        className="relative bg-white w-full max-w-sm rounded-3xl p-8 text-center shadow-2xl overflow-hidden"
+                        className="relative bg-white w-full max-w-[calc(100vw-2rem)] sm:max-w-sm rounded-3xl p-6 sm:p-8 text-center shadow-2xl overflow-hidden"
                     >
                         {/* Background Gradients */}
                         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-yellow-400 to-transparent -z-10 opacity-20" />
