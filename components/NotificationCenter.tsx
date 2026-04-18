@@ -13,9 +13,7 @@ export default function NotificationCenter() {
 
     const fetchNotifications = async () => {
         try {
-            console.log("Fetching notifications...");
             const data = await api.notifications.getAll();
-            console.log("Notifications received:", data);
             setNotifications(data);
             setUnreadCount(data.filter((n: any) => !n.read).length);
         } catch (e) {

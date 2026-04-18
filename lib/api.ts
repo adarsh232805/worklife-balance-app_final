@@ -83,7 +83,7 @@ export const api = {
                 }
                 return res.json();
             } catch (e) {
-                console.warn('Network error fetching progress:', e);
+                // Silently return null for network errors during background updates
                 return null;
             }
         }

@@ -17,29 +17,27 @@ export default function LevelProgress() {
             try {
                 const data = await api.user.getProgress();
 
-                // Check for level up
-                if (data && data.level > prevLevel.current && prevLevel.current > 0) {
-                    setShowLevelUp(true);
-                }
-
-                if (data) {
-                    // Update refs and state
-                    prevLevel.current = data.level;
-                    setProgress(data);
-                }
-            } catch (error) {
-                // Silent fail on progress update to prevent UI crash
-                console.warn('Background sync failed:', error);
+            if (data && data.level > prevLevel.current && prevLevel.current > 0) {
+                setShowLevelUp(true);
             }
-        };
+
+            if (data) {
+                // Update refs and state
+                prevLevel.current = data.level;
+                setProgress(data);
+            }
+        } catch (error) {
+            // Silently fail progress updates to prevent UI noise on session timeout
+        }
+    };
 
         fetchProgress();
-        // Refresh every 10s (faster sync for better feedback)
-        const interval = setInterval(fetchProgress, 10000);
+        // Refresh every 30s instead of 10s to reduce churn, especially on mobile/background
+        const interval = setInterval(fetchProgress, 30000);
         return () => clearInterval(interval);
     }, []);
 
-    const progressPercent = Math.min(100, (progress.xp / progress.nextLevelXp) * 100);
+    const progressPercent = Math.min(100, (progress.xp / (progress.nextLevelXp || 100)) * 100);
 
     return (
         <>

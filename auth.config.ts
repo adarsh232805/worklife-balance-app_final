@@ -11,21 +11,20 @@ export const authConfig = {
     callbacks: {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
-            console.log('Middleware checking path:', nextUrl.pathname, 'User logged in:', isLoggedIn);
+            
+            // Helpful server-side logging for Vercel diagnostic
+            if (!isLoggedIn && nextUrl.pathname.startsWith('/dashboard')) {
+                console.log(`[Auth] Unauthorized access attempt to ${nextUrl.pathname}`);
+            }
 
             // Explicitly allow landing page
-            if (nextUrl.pathname === '/') return true;
+            if (nextUrl.pathname === '/' || nextUrl.pathname === '/login') return true;
 
             const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
 
             if (isOnDashboard) {
                 if (isLoggedIn) return true;
                 return false; // Redirect unauthenticated users to login page
-            } else if (isLoggedIn) {
-                // Redirect authenticated users to dashboard if they visit login page
-                if (nextUrl.pathname.startsWith('/login')) {
-                    return Response.redirect(new URL('/dashboard', nextUrl));
-                }
             }
             return true;
         },
