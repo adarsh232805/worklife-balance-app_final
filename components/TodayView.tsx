@@ -102,6 +102,11 @@ export default function TodayView() {
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('day');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
@@ -295,9 +300,11 @@ export default function TodayView() {
         {/* HEADER AREA */}
         <div className="flex justify-between items-center px-2 md:px-0">
           <div>
-            <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{todayString()}</p>
+            <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
+                {isMounted ? todayString() : "Loading..."}
+            </p>
             <h1 className="text-2xl md:text-3xl font-black text-slate-900 leading-none">
-              {getGreeting()}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">{session?.user?.name?.split(' ')[0]}</span>
+              {isMounted ? getGreeting() : "Hello"}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">{session?.user?.name?.split(' ')[0] || "User"}</span>
             </h1>
           </div>
         </div>
