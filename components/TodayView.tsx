@@ -241,7 +241,7 @@ export default function TodayView() {
     ...reminders.map(r => ({
       ...r,
       type: 'reminder',
-      time: new Date(r.time).toISOString() // Reminders use timestamp
+      time: r.time // Reminder timestamp, no UTC conversion to preserve local time
     })),
     ...events.map(e => ({
       ...e,
@@ -263,9 +263,10 @@ export default function TodayView() {
     }))
   ].sort((a, b) => new Date(a.time || a.startTime || a.date).getTime() - new Date(b.time || b.startTime || b.date).getTime());
 
-  // Group by Date for Week/Month views
+  // Group by Local Date for Week/Month views
   const groupedItems = timelineItems.reduce((groups: any, item: any) => {
-    const date = (item.time || item.startTime || item.date).split('T')[0];
+    const d = new Date(item.time || item.startTime || item.date);
+    const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     if (!groups[date]) {
       groups[date] = [];
     }
@@ -452,7 +453,10 @@ export default function TodayView() {
                       {viewMode !== 'day' && (
                         <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md py-2 mb-4 border-b border-slate-100">
                           <h4 className="font-bold text-slate-900 text-lg flex items-center gap-2">
-                            {new Date(dateKey).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}
+                            {(() => {
+                              const [y, m, d] = dateKey.split('-');
+                              return new Date(Number(y), Number(m) - 1, Number(d)).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+                            })()}
                             <span className="text-xs font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{items.length} items</span>
                           </h4>
                         </div>

@@ -253,7 +253,7 @@ export default function CalendarTab() {
   }, [events]);
 
   return (
-    <div className="flex flex-col xl:flex-row h-[calc(100vh-140px)] gap-6 p-2">
+    <div className="flex flex-col xl:flex-row min-h-[calc(100vh-80px)] xl:h-[calc(100vh-80px)] gap-6 p-2">
       <CalendarNotificationManager events={events} />
 
       {/* SIDEBAR */}
@@ -452,7 +452,7 @@ export default function CalendarTab() {
       </div>
 
       {/* MAIN CALENDAR */}
-      <div className="flex-1 bg-white/70 backdrop-blur-2xl rounded-[2.5rem] border border-white/60 shadow-2xl shadow-indigo-100/50 p-6 md:p-8 flex flex-col overflow-hidden relative z-0 h-full">
+      <div className="flex-1 bg-white/70 backdrop-blur-2xl rounded-[2.5rem] border border-white/60 shadow-2xl shadow-indigo-100/50 p-6 md:p-8 flex flex-col overflow-hidden relative z-0 min-h-[600px] xl:min-h-0 h-full">
         {/* Floating gradient in background for depth */}
         <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-purple-200/30 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-blue-200/30 rounded-full blur-3xl pointer-events-none" />
