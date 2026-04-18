@@ -488,7 +488,7 @@ export default function CalendarTab() {
       {/* Mobile Add Button */}
       <button
         onClick={() => { setSelectedEvent(null); setSelectedSlot(null); setModalOpen(true); }}
-        className="md:hidden fixed bottom-24 right-6 w-14 h-14 bg-slate-900 text-white rounded-full shadow-2xl flex items-center justify-center z-50 active:scale-95 transition-transform"
+        className="md:hidden fixed bottom-8 right-6 w-14 h-14 bg-slate-900 text-white rounded-full shadow-2xl flex items-center justify-center z-50 active:scale-95 transition-transform"
       >
         <Plus size={24} />
       </button>

@@ -13,7 +13,8 @@ import {
     Settings,
     LogOut,
     Menu,
-    Heart
+    Heart,
+    X
 } from "lucide-react";
 import { useState } from "react";
 
@@ -32,16 +33,27 @@ const NAV_ITEMS = [
 interface SidebarProps {
     activeTab: string;
     setActiveTab: (id: string) => void;
+    isMobileMenuOpen: boolean;
+    setIsMobileMenuOpen: (val: boolean) => void;
 }
 
-export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
+export default function Sidebar({ activeTab, setActiveTab, isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     return (
+        <>
+        {/* Mobile Overlay */}
+        {isMobileMenuOpen && (
+            <div 
+                className="fixed inset-0 bg-black/50 z-[90] md:hidden backdrop-blur-sm"
+                onClick={() => setIsMobileMenuOpen(false)}
+            />
+        )}
+
         <motion.aside
             initial={{ width: 250 }}
             animate={{ width: isCollapsed ? 80 : 250 }}
-            className="hidden md:flex flex-col h-screen glass border-r z-50 fixed left-0 top-0 transition-all duration-300"
+            className={`flex flex-col h-screen glass border-r z-[100] fixed left-0 top-0 transition-transform duration-300 md:translate-x-0 ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
             {/* HEADER */}
             <div className="p-6 flex items-center justify-between">
@@ -54,12 +66,20 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
                         WorkLife+
                     </motion.h1>
                 )}
-                <button
-                    onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="p-2 hover:bg-white/50 rounded-lg transition-colors"
-                >
-                    <Menu size={20} className="text-slate-600" />
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        className="hidden md:block p-2 hover:bg-white/50 rounded-lg transition-colors"
+                    >
+                        <Menu size={20} className="text-slate-600" />
+                    </button>
+                    <button
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="md:hidden p-2 hover:bg-white/50 rounded-lg transition-colors"
+                    >
+                        <X size={20} className="text-slate-600" />
+                    </button>
+                </div>
             </div>
 
             {/* NAV LINKS */}
@@ -69,7 +89,10 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
                     return (
                         <button
                             key={item.id}
-                            onClick={() => setActiveTab(item.id)}
+                            onClick={() => {
+                                setActiveTab(item.id);
+                                setIsMobileMenuOpen(false); // Close on mobile when selecting
+                            }}
                             className={`w-full flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden ${isActive
                                 ? "bg-primary text-white shadow-lg shadow-primary/30"
                                 : "hover:bg-white/50 text-slate-600 hover:text-slate-900"
@@ -106,5 +129,6 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
                 </button>
             </div>
         </motion.aside>
+        </>
     );
 }

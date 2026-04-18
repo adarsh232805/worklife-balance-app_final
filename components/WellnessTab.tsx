@@ -115,7 +115,7 @@ export default function WellnessTab() {
     }
 
     return (
-        <div className="space-y-8 pb-32 md:pb-8">
+        <div className="space-y-8 pb-8">
 
             {/* HERDER & SCORE */}
             <section className="relative overflow-hidden bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-indigo-500/20">

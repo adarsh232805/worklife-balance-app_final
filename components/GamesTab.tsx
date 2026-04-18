@@ -91,7 +91,7 @@ export default function GamesTab() {
   const [showStats, setShowStats] = useState(false);
 
   return (
-    <div className="space-y-8 p-4 pb-32 md:pb-8">
+    <div className="space-y-8 p-4 pb-8">
       {/* HEADER */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

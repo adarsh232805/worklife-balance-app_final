@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Sidebar from "@/components/Sidebar";
-import BottomNav from "@/components/BottomNav";
 import Navbar from "@/components/Navbar";
 
 import dynamic from "next/dynamic";
@@ -50,6 +49,7 @@ function TabLoading() {
 
 export default function AppPage() {
   const [activeTab, setActiveTab] = useState("today");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Map tab IDs to components and labels
   const renderContent = () => {
@@ -70,14 +70,14 @@ export default function AppPage() {
   return (
     <div className="min-h-screen bg-background text-slate-800 flex">
 
-      {/* DESKTOP SIDEBAR */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      {/* SIDEBAR */}
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
 
       {/* MAIN LAYOUT */}
-      <div className="flex-1 flex flex-col md:ml-[250px] transition-all duration-300 relative pb-24 md:pb-0">
+      <div className="flex-1 flex flex-col md:ml-[250px] transition-all duration-300 relative pb-4 md:pb-0">
 
         {/* TOP NAVBAR */}
-        <Navbar />
+        <Navbar setIsMobileMenuOpen={setIsMobileMenuOpen} />
 
         {/* DYNAMIC CONTENT AREA */}
         <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
@@ -95,9 +95,6 @@ export default function AppPage() {
           </AnimatePresence>
         </main>
       </div>
-
-      {/* MOBILE BOTTOM NAV */}
-      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
     </div>
   );

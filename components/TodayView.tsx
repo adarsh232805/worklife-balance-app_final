@@ -289,7 +289,7 @@ export default function TodayView() {
 
   return (
     <>
-      <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 pb-24 md:pb-8 p-1 font-sans">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 pb-8 p-1 font-sans">
 
         {/* HEADER AREA */}
         <div className="flex justify-between items-center px-4 md:px-0">

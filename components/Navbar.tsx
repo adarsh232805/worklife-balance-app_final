@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Search, User, LogOut, Settings } from "lucide-react";
+import { Bell, Search, User, LogOut, Settings, Menu } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { logOut } from "@/lib/actions";
 import Image from "next/image";
@@ -9,14 +9,24 @@ import LevelProgress from "./LevelProgress";
 
 import NotificationCenter from "./NotificationCenter";
 
-export default function Navbar() {
+interface NavbarProps {
+    setIsMobileMenuOpen: (val: boolean) => void;
+}
+
+export default function Navbar({ setIsMobileMenuOpen }: NavbarProps) {
     const { data: session } = useSession();
     const user = session?.user;
 
     return (
         <header className="sticky top-0 z-30 w-full glass border-b md:bg-transparent md:border-b-0 md:backdrop-filter-none md:static px-6 py-4 flex items-center justify-between">
-            {/* Mobile Brand (Desktop brand is in Sidebar) */}
-            <div className="md:hidden">
+            {/* Mobile Brand & Menu Toggle */}
+            <div className="md:hidden flex items-center gap-3">
+                <button 
+                    onClick={() => setIsMobileMenuOpen(true)}
+                    className="p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                >
+                    <Menu size={24} />
+                </button>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
                     WorkLife+
                 </h1>

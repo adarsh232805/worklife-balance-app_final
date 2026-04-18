@@ -23,7 +23,7 @@ export default function ReminderList({ reminders, onToggle, onDelete, onEdit }: 
     const completed = sorted.filter(r => r.completed);
 
     return (
-        <div className="space-y-8 pb-32">
+        <div className="space-y-8 pb-8">
             <Section title="Overdue" items={overdue} onToggle={onToggle} onDelete={onDelete} onEdit={onEdit} color="text-red-600" />
             <Section title="Today" items={today} onToggle={onToggle} onDelete={onDelete} onEdit={onEdit} color="text-indigo-600" />
             <Section title="Tomorrow" items={tomorrow} onToggle={onToggle} onDelete={onDelete} onEdit={onEdit} color="text-slate-600" />

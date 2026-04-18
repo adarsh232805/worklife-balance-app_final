@@ -9,7 +9,7 @@ export default function MediaDashboard() {
     const [activeTab, setActiveTab] = useState<"news" | "videos">("news");
 
     return (
-        <div className="space-y-8 pb-32">
+        <div className="space-y-8 pb-8">
             {/* HERO HEADER */}
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-violet-600 to-indigo-600 p-8 md:p-12 text-white shadow-2xl">
                 <div className="relative z-10">

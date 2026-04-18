@@ -45,7 +45,7 @@ export default function AnalyticsDashboard() {
     if (!data) return <div>Failed to load data</div>;
 
     return (
-        <div className="space-y-6 pb-24">
+        <div className="space-y-6 pb-8">
 
             {/* CONTROLS */}
             <div className="flex justify-between items-center">
@@ -107,7 +107,7 @@ export default function AnalyticsDashboard() {
                     </div>
 
                     {/* AI COACH FLOATING BUTTON & MODAL */}
-                    <div className="fixed bottom-24 right-6 md:bottom-8 md:right-8 z-50">
+                    <div className="fixed bottom-8 right-6 md:right-8 z-50">
                         <button
                             onClick={() => setIsCoachOpen(true)}
                             className="group relative flex items-center gap-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-5 py-3.5 rounded-full shadow-lg shadow-indigo-500/30 hover:scale-105 hover:shadow-indigo-500/50 transition-all"

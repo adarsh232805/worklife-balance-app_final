@@ -102,7 +102,7 @@ export default function AICoachTab() {
     ];
 
     return (
-        <div className="flex h-[calc(100vh-140px)] md:h-[calc(100vh-120px)] max-w-7xl mx-auto rounded-[32px] overflow-hidden shadow-2xl border border-white/20 bg-slate-900/5 backdrop-blur-sm">
+        <div className="flex h-[calc(100vh-80px)] max-w-7xl mx-auto rounded-[32px] overflow-hidden shadow-2xl border border-white/20 bg-slate-900/5 backdrop-blur-sm">
 
             {/* SIDEBAR (Desktop) */}
             <div className="hidden md:flex w-80 bg-white/90 backdrop-blur-xl border-r border-white/20 flex-col p-6 gap-6">
