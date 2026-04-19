@@ -1,14 +1,29 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { authenticate, register } from '@/lib/actions';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
+    const { status } = useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (status === 'authenticated') {
+            router.replace('/dashboard');
+        }
+    }, [status, router]);
+
     const [isLogin, setIsLogin] = useState(true);
     const [isPending, startTransition] = useTransition();
     const [errorMessage, setErrorMessage] = useState<string | undefined>('');
     const [registerMessage, setRegisterMessage] = useState<string | undefined>('');
+
+    if (status === 'loading' || status === 'authenticated') {
+        return null;
+    }
 
     const handleLogin = async (formData: FormData) => {
         setErrorMessage('');
