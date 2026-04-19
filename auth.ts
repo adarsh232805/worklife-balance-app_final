@@ -42,14 +42,20 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                 if (parsedCredentials.success) {
                     const { email, password } = parsedCredentials.data;
                     console.log("[Auth] Looking up email:", email);
+                    console.time('[Auth] getUser');
                     const user = await getUser(email);
+                    console.timeEnd('[Auth] getUser');
+                    
                     if (!user) {
                         console.log("[Auth] User not found in DB.");
                         return null;
                     }
 
                     console.log("[Auth] User found! Comparing hashes...");
+                    console.time('[Auth] bcrypt compare');
                     const passwordsMatch = await bcrypt.compare(password, user.password as string);
+                    console.timeEnd('[Auth] bcrypt compare');
+                    
                     if (passwordsMatch) {
                         console.log("[Auth] Passwords match! Returning user.");
                         return { id: user.id, name: user.name, email: user.email };

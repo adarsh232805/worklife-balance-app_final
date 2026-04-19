@@ -15,17 +15,11 @@ export async function GET(req: Request) {
 
         await dbConnect();
 
-        // Find user by email to get ID
-        const user = await User.findOne({ email: session.user.email });
-        if (!user) {
-            return NextResponse.json({ error: "User not found" }, { status: 404 });
-        }
-
         const { searchParams } = new URL(req.url);
         const startDateParam = searchParams.get('startDate');
         const endDateParam = searchParams.get('endDate');
 
-        const query: any = { userId: user._id };
+        const query: any = { userId: session.user.id };
 
         if (startDateParam && endDateParam) {
             const start = new Date(startDateParam).getTime();
@@ -70,14 +64,8 @@ export async function POST(req: Request) {
 
         await dbConnect();
 
-        // Find user by email to get ID
-        const user = await User.findOne({ email: session.user.email });
-        if (!user) {
-            return NextResponse.json({ error: "User not found" }, { status: 404 });
-        }
-
         const newReminder = await Reminder.create({
-            userId: user._id,
+            userId: session.user.id,
             title,
             description,
             time,

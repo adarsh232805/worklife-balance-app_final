@@ -57,13 +57,13 @@ export default function LandingNavbar() {
 
                 <div className="hidden md:flex items-center gap-4">
                     <Link
-                        href="/dashboard"
+                        href="/login"
                         className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                     >
                         Log in
                     </Link>
                     <Link
-                        href="/dashboard"
+                        href="/login"
                         className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-full transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                     >
                         Get Started
@@ -101,14 +101,14 @@ export default function LandingNavbar() {
                             ))}
                             <div className="h-px bg-slate-100 my-2" />
                             <Link
-                                href="/dashboard"
+                                href="/login"
                                 className="text-base font-medium text-slate-600 hover:text-slate-900 py-2"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Log in
                             </Link>
                             <Link
-                                href="/dashboard"
+                                href="/login"
                                 className="text-center px-4 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors"
                                 onClick={() => setMobileMenuOpen(false)}
                             >

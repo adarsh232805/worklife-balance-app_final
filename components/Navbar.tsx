@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Bell, Search, User, LogOut, Settings, Menu } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { logOut } from "@/lib/actions";
+import { useSession, signOut } from "next-auth/react";
+// import { logOut } from "@/lib/actions"; // No longer using server action for sign-out
 import Image from "next/image";
 import Link from "next/link";
 import LevelProgress from "./LevelProgress";
@@ -81,7 +81,7 @@ export default function Navbar({ setIsMobileMenuOpen }: NavbarProps) {
                                 Settings
                             </Link>
                             <button
-                                onClick={() => logOut()}
+                                onClick={() => signOut({ callbackUrl: '/login' })}
                                 className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors rounded-b-xl"
                             >
                                 <LogOut size={16} />

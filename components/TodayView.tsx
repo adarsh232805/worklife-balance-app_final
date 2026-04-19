@@ -139,15 +139,17 @@ export default function TodayView() {
       const endStr = end.toISOString();
 
       // Parallel Fetch
+      console.log('[Dashboard] Fetch started for all APIs...');
       const [tasksRes, eventsRes, analyticsRes, progressRes, activityRes, healthRes, remindersRes] = await Promise.all([
-        api.tasks.getAll(undefined, startStr, endStr),
-        api.calendar.getEvents(undefined, startStr, endStr),
-        api.analytics.get(),
-        api.user.getProgress(),
-        api.activity.getHistory(undefined, startStr, endStr),
-        api.health.getDaily(undefined, startStr, endStr).catch(() => null),
-        api.reminders.getAll(startStr, endStr) // Fetch actual reminders
+        api.tasks.getAll(undefined, startStr, endStr).then(r => { console.log('✓ Tasks loaded'); return r; }),
+        api.calendar.getEvents(undefined, startStr, endStr).then(r => { console.log('✓ Events loaded'); return r; }),
+        api.analytics.get().then(r => { console.log('✓ Analytics loaded'); return r; }),
+        api.user.getProgress().then(r => { console.log('✓ Progress loaded'); return r; }),
+        api.activity.getHistory(undefined, startStr, endStr).then(r => { console.log('✓ Activity loaded'); return r; }),
+        api.health.getDaily(undefined, startStr, endStr).catch(() => null).then(r => { console.log('✓ Health loaded'); return r; }),
+        api.reminders.getAll(startStr, endStr).then(r => { console.log('✓ Reminders loaded'); return r; })
       ]);
+      console.log('[Dashboard] All APIs resolved successfully');
 
       setTasks(tasksRes);
       setEvents(eventsRes);
@@ -183,10 +185,14 @@ export default function TodayView() {
   /* LOAD DATA */
   useEffect(() => {
     setQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
+    console.log('[Dashboard] Starting initial data fetch...');
     fetchData();
 
-    // Polling
-    const interval = setInterval(fetchData, 30000);
+    // Polling - Increased interval for performance
+    const interval = setInterval(() => {
+        console.log('[Dashboard] Starting background refresh...');
+        fetchData();
+    }, 60000);
     return () => clearInterval(interval);
   }, [fetchData]);
 

@@ -1,4 +1,4 @@
-import { ITask } from './models/Task';
+import type { ITask } from './models/Task';
 
 export const api = {
     tasks: {

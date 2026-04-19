@@ -12,18 +12,28 @@ export default function LoginPage() {
 
     const handleLogin = async (formData: FormData) => {
         setErrorMessage('');
-        startTransition(async () => {
-            const result = await authenticate(undefined, formData);
-            if (result) setErrorMessage(result);
-        });
+        try {
+            startTransition(async () => {
+                const result = await authenticate(undefined, formData);
+                if (result) setErrorMessage(result);
+            });
+        } catch (e) {
+            setErrorMessage('An unexpected client error occurred. Please try again.');
+            console.error('Login transition error:', e);
+        }
     };
 
     const handleRegister = async (formData: FormData) => {
         setRegisterMessage('');
-        startTransition(async () => {
-            const result = await register(undefined, formData);
-            if (result) setRegisterMessage(result);
-        });
+        try {
+            startTransition(async () => {
+                const result = await register(undefined, formData);
+                if (result) setRegisterMessage(result);
+            });
+        } catch (e) {
+            setRegisterMessage('An unexpected client error occurred. Please try again.');
+            console.error('Registration transition error:', e);
+        }
     };
 
     return (
@@ -96,7 +106,7 @@ export default function LoginPage() {
                             {registerMessage === 'success' ? (
                                 <div className="p-4 bg-green-50 text-green-600 rounded-xl text-center">
                                     <p className="font-bold">Account created! 🎉</p>
-                                    <p className="text-sm mt-1">Please switch to Log In.</p>
+                                    <p className="text-sm mt-1">Signing you in, please wait...</p>
                                 </div>
                             ) : (
                                 <>
